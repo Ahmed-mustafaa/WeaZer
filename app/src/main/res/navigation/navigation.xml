@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/Alarm">
+
+    <fragment
+        android:id="@+id/Alarm"
+        android:name="com.example.weatherapp.AlarmScreen"
+        tools:layout="@layout/alarm_screen">
+    </fragment>
+   
+    <fragment
+        android:id="@+id/favorites"
+        android:name="com.example.weatherapp.FavoritesFragment"
+        tools:layout="@layout/activity_favorites" >
+        <action
+            android:id="@+id/action_favoritesFragment_to_mapsFragment"
+            app:destination="@id/mapsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settings"
+        android:name="com.example.weatherapp.SettingsFragment"
+        tools:layout="@layout/settingsscreen"
+        />
+    <fragment
+        android:id="@+id/mapsFragment"
+        android:name="com.example.weatherapp.MapsFragment"
+        tools:layout="@layout/fragment_maps" >
+
+    <!-- Define any actions or arguments if needed -->
+        <action
+            android:id="@+id/action_mapsFragment_to_favorites"
+            app:destination="@id/favorites" />
+    </fragment>
+
+</navigation>

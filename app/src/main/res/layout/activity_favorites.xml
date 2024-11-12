@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragment_container_view"
+        android:name="com.example.weatherapp.MapsFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/favoritesRV"
+        android:layout_width="409dp"
+        android:layout_height="274dp"
+        android:layout_marginTop="12dp"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/upper_bar" />
+
+    <com.google.android.material.circularreveal.cardview.CircularRevealCardView
+        android:id="@+id/upper_bar"
+        android:layout_width="match_parent"
+        android:layout_height="82dp"
+        android:layout_marginTop="40dp"
+        app:cardBackgroundColor="#C6090908"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/Favorites"
+            android:layout_width="172dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginStart="100dp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/alata"
+            android:text="@string/Favorites"
+            android:textColor="#ECF1F3"
+            android:textSize="40sp" />
+
+    </com.google.android.material.circularreveal.cardview.CircularRevealCardView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="440dp"
+        android:layout_marginEnd="40dp"
+        android:tint="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/upper_bar"
+        app:srcCompat="@drawable/plus" />
+
+    <TextView
+        android:id="@+id/noFav"
+        android:layout_width="413dp"
+        android:layout_height="109dp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="228dp"
+        android:layout_marginEnd="2dp"
+        android:fontFamily="@font/alata"
+        android:text="@string/NoFavorites"
+        android:textColor="#ECF1F3"
+        android:textSize="40sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/upper_bar" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+ <item
+     android:id="@+id/Home_title"
+     android:title="Home"/>
+ <item
+     android:id="@+id/Favorites_title"
+     android:title="Favorites"/>
+ <item
+     android:id="@+id/Settings_title"
+     android:title="Settings"/>
+<item
+    android:id="@+id/Alarm_title"
+    android:title="Alarm"/>
+
+
+</menu>

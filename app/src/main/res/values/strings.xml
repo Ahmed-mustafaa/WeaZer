@@ -1,0 +1,47 @@
+<resources>
+    <string name="app_name">WeatherApp</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
+    <string name="no_alarm" translatable="false">No Alarm\n</string>
+    <string name="drawer_open" translatable="false">Open drawer</string>
+    <string name="drawer_close" translatable="false">Close drawer</string>
+    <string name="Favorites" translatable="false">Favorites</string>
+    <string name="No_Favorite_Places" translatable="false">No Favorite Places</string>
+    <string name="Location" translatable="false">Location</string>
+    <string name="latitude" translatable="false">latitude</string>
+    <string name="longitude" translatable="false">longitude</string>
+    <string name="Wind" translatable="false">Wind</string>
+    <string name="Pressure" translatable="false">Pressure</string>
+    <string name="Humidity" translatable="false">Humidity</string>
+    <string name="AirQuality" translatable="false">Air Quality</string>
+    <string name="Uv" translatable="false">Ultra Violent</string>
+    <string name="Tomorrow" translatable="false">Tomorrow</string>
+    <string name="feelsLike" translatable="false">Feels Like:</string>
+    <string name="Broken" translatable="false">broken</string>
+    <string name="clear_sky">Clear Sky</string>
+    <string name="few_clouds">Few Clouds</string>
+    <string name="scattered_clouds">Scattered Clouds</string>
+    <string name="overcast_clouds">Overcast Clouds</string>
+    <string name="rain">rain</string>
+    <string name="smoke">smoke</string>
+    <string name="haze">haze</string>
+    <string name="dust">dust</string>
+    <string name="fog">fog</string>
+    <string name="ash">ash</string>
+    <string name="sand">sand</string>
+    <string name="squall">squall</string>
+    <string name="snow">snow</string>
+    <string name="mist">mist</string>
+    <string name="tornado">tornado</string>
+    <string name="drizzle">drizzle</string>
+    <string name="light_rain">light rain</string>
+    <string name="thunderstorm">thunderstorm</string>
+    <string name="broken_clouds">broken clouds</string>
+    <string name="visibility">Visibility</string>
+    <string name="L">L</string>
+    <string name="H">H</string>
+    <string name="Language">Language</string>
+    <string name="Ar">Ar</string>
+    <string name="En">En</string>
+    <string name="NoFavorites">"No Favorite places "</string>
+</resources>

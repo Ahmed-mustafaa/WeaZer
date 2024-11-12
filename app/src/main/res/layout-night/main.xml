@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_bg"
+    tools:context=".MainActivity">
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="2.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/materialCardView"
+                style="@style/CustomCardViewStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="484dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:backgroundTint="#5EA9A9A9"
+                android:elevation="20dp">
+
+                <ImageButton
+                    android:id="@+id/pickuplocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#00FFFFFF"
+                    android:src="@drawable/location" />
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/hourlyRec"
+                    android:layout_width="380dp"
+                    android:layout_height="171dp"
+                    android:layout_gravity="clip_horizontal|start|center_horizontal|fill"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="260dp"
+                    android:accessibilityLiveRegion="assertive"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    app:spanCount="1"
+                    tools:itemCount="8"
+                    tools:listitem="6" />
+
+                <TextView
+                    android:id="@+id/lat"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="100dp"
+                    android:layout_marginTop="50dp"
+                    android:background="@color/ColorOnSurface"
+                    android:fontFamily="@font/alata"
+                    android:gravity="center"
+                    android:text="lat"
+                    android:textColor="@color/white"
+
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/lon"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="240dp"
+                    android:layout_marginTop="50dp"
+                    android:background="@color/ColorOnSurface"
+                    android:backgroundTint="#20FFFFFF"
+                    android:fontFamily="@font/alata"
+                    android:gravity="center"
+                    android:text="lon"
+
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/cityText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="80dp"
+                    android:fontFamily="@font/alata"
+                    android:gravity="center"
+                    android:text="Location"
+                    android:textColor="@color/white"
+
+                    android:textSize="30sp" />
+
+                <ImageView
+                    android:id="@+id/icon"
+                    android:layout_width="266dp"
+                    android:layout_height="121dp"
+                    android:layout_marginStart="40dp"
+                    android:layout_marginTop="120dp"
+                    app:srcCompat="@drawable/cloudy" />
+
+
+                <TextView
+                    android:id="@+id/Temp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="200dp"
+                    android:layout_marginTop="90dp"
+                    android:fontFamily="@font/alata"
+                    android:text="TextView"
+                    android:textColor="#fff"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/Descriptions"
+                    android:layout_width="118dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="80dp"
+                    android:layout_marginTop="90dp"
+                    android:fontFamily="@font/alata"
+                    android:text="TextView"
+                    android:textSize="20sp" />
+
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout"
+                android:layout_width="match_parent"
+                android:layout_height="746dp"
+
+                android:layout_below="@+id/materialCardView"
+                android:layout_marginTop="1dp"
+                app:layout_constraintTop_toBottomOf="@id/materialCardView">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/forecastRec"
+                    android:layout_width="450dp"
+                    android:layout_height="278dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="20dp"
+                    app:layout_constraintBottom_toTopOf="@+id/DailyCardView"
+                    app:layout_constraintStart_toStartOf="@id/constraintLayout"
+                    app:layout_constraintTop_toTopOf="@id/constraintLayout"
+
+                    />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/DailyCardView"
+                    style="@style/CustomCardViewStyle"
+                    android:layout_width="518dp"
+                    android:layout_height="303dp"
+                    android:layout_below="@+id/forecastRec"
+                    android:layout_marginTop="44dp"
+                    android:backgroundTint="#5EA9A9A9"
+                    android:elevation="0dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/forecastRec">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/dailyRec"
+                        android:layout_width="518dp"
+                        android:layout_height="299dp"
+                        android:layout_below="@+id/forecastRec"
+                        android:layout_marginStart="70dp"
+                        android:layout_marginTop="10dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/forecastRec" />
+
+                </com.google.android.material.card.MaterialCardView>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </RelativeLayout>
+    </ScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+
+

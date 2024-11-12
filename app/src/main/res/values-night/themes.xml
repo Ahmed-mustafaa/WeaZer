@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.WeatherApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your dark theme here. -->
+        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">#1E2A5E</item>
+        <item name="colorPrimaryVariant">#D2E0FB</item>
+        <item name="colorOnPrimary">#fff</item>
+        <item name="colorOnSurface">#5A2A1E</item>
+    </style>
+</resources>
