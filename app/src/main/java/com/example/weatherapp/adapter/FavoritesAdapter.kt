@@ -29,7 +29,7 @@ class FavoritesAdapter(private var favoriteItemsList:List<ForCast>):RecyclerView
     override fun onBindViewHolder(holder: FavoritesViewHolder, position: Int) {
         val weather = favoriteItemsList[position]
         holder.cityName.text = weather.city.name
-        holder.tempDisplay.text = "H:${weather.weatherList[0].main.temp_max} \n L:${weather.weatherList[0].main.temp_min}"
+        holder.DisplayTemp.text = "${weather.weatherList[0].main.temp.toInt()}°C"
 /*
         holder.timeDisplay.text = weather.weatherList[0].dt_txt
 */
@@ -57,9 +57,7 @@ class FavoritesAdapter(private var favoriteItemsList:List<ForCast>):RecyclerView
 class FavoritesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val favoriteItemsImage: CircularRevealCardView = itemView.findViewById(R.id.favItem)
     val cityName: TextView = itemView.findViewById(R.id.CityName)
-    val tempDisplay: TextView = itemView.findViewById(R.id.lat)
-    val lon: TextView = itemView.findViewById(R.id.lon)
-/*
-    val timeDisplay: TextView = itemView.findViewById(R.id.timeDisplay)
-*/
+    val DisplayTemp: TextView = itemView.findViewById(R.id.DisplayTemp)
+
+
 }
