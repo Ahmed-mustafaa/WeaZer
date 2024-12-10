@@ -3,29 +3,174 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#00FFFFFF">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="76dp"
-        android:layout_marginTop="52dp"
-        android:text="@string/Language"
-        android:textColor="@color/black"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/materialCardView3"
+        android:layout_width="356dp"
+        android:layout_height="304dp"
+        android:layout_marginTop="120dp"
+        android:backgroundTint="#7746597D"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.49"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="115dp"
+            android:layout_height="33dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/alata"
+            android:text="@string/Language"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/ArabicSwitchButton"
+            style="@style/CustomCardViewStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="148dp"
+            android:layout_marginTop="50dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textOff="@string/En"
+            android:textOn="@string/Ar"
+            app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+        <TextView
+            android:id="@+id/Temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="100dp"
+            android:fontFamily="@font/alata"
+            android:text="@string/Temp_unit"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ArabicSwitchButton" />
+
+        <TextView
+            android:id="@+id/Wind"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="200dp"
+            android:layout_marginTop="100dp"
+            android:fontFamily="@font/alata"
+            android:text="@string/Wind_unit"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ArabicSwitchButton" />
+
+        <RadioGroup
+            android:id="@+id/tempRadioGroup"
+            android:layout_width="150dp"
+            android:layout_height="142dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="150dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <RadioButton
+                android:id="@+id/celsiusRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/Celsius"
+                android:textColorHighlight="@color/Primary" />
+
+            <RadioButton
+                android:id="@+id/fahrenheitRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/Fahrenheit" />
+
+            <RadioButton
+                android:id="@+id/kelvinRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/Kelvin" />
+
+        </RadioGroup>
+
+        <RadioGroup
+            android:id="@+id/windRadioGroup"
+            android:layout_width="124dp"
+            android:layout_height="97dp"
+
+            android:layout_marginStart="228dp"
+            android:layout_marginTop="150dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <RadioButton
+                android:id="@+id/KMRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:text="@string/Km"
+                android:textColorHighlight="#FFFFFF"
+                android:textColorLink="#1CA2A2" />
+
+            <RadioButton
+                android:id="@+id/MPHRadioButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/mph" />
+
+
+        </RadioGroup>
+
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="230dp"
+            android:layout_marginTop="60dp"
+            android:background="#FFFFFF"
+            android:text="@string/Ar"
+            android:textColor="#1B2E2E"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toStartOf="@+id/ArabicSwitchButton"
+            app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="80dp"
+            android:layout_marginTop="60dp"
+            android:background="#FFFFFF"
+            android:text="@string/En"
+            android:textColor="#2E6C1D"
+            android:textSize="20sp"
+            app:layout_constraintStart_toEndOf="@+id/ArabicSwitchButton"
+            app:layout_constraintTop_toBottomOf="@+id/textView" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/Save"
+        hoorizontal_gravity="center"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
+        android:layout_marginBottom="132dp"
+        android:fontFamily="@font/alata"
+        android:text="@string/Save"
         android:textSize="20sp"
+        app:backgroundTint="@color/ColorOnSurface"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.54"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/materialCardView3">
 
-    <ToggleButton
-        android:id="@+id/ArabicToggleButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="84dp"
-        android:layout_marginTop="8dp"
-        android:textOff="Ar"
-        android:textOn="En"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
-
+    </com.google.android.material.button.MaterialButton>
 </androidx.constraintlayout.widget.ConstraintLayout>

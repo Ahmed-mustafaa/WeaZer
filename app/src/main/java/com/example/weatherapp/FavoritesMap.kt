@@ -1,5 +1,6 @@
 package com.example.weatherapp
 
+import SharedPrefs
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
@@ -47,11 +48,12 @@ class FavoritesMap : Fragment() {
     private var selectedGeoPoint: GeoPoint? = null
     private val suggestionList = mutableListOf<String>()
     private lateinit var suggestionAdapter: SuggestionAdapter
-
+private lateinit var sharedPreferences:SharedPrefs
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sharedPreferences = SharedPrefs(requireContext())
         Configuration.getInstance().userAgentValue = requireContext().packageName
-        fac = ViewModelFactory(WeatherRepository(RetrofitClient.apiService, requireContext()))
+        fac = ViewModelFactory(WeatherRepository(RetrofitClient.apiService, requireContext()),sharedPreferences)
         weatherVM = ViewModelProvider(this, fac).get(WeatherVM::class.java)
 
 
@@ -222,6 +224,7 @@ class FavoritesMap : Fragment() {
     private fun setupSearchFunctionality() {
         suggestionAdapter = SuggestionAdapter(suggestionList) { selectedSuggestion ->
             searchLocation(selectedSuggestion)
+
         }
         binding.suggestionsRecyclerView.layoutManager = LinearLayoutManager(context)
         binding.suggestionsRecyclerView.adapter = suggestionAdapter

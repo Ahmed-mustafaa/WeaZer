@@ -2,7 +2,6 @@
 <resources>
     <string name="app_name">weaZar</string>
     <string name="Favorites">المفضله</string>
-    <string name="No_Favorite_Places">لا يوجد اماكن مفضله</string>
     <string name="Location">الموقع</string>
     <string name="latitude">خط عرض</string>
     <string name="longitude">خط طول</string>
@@ -21,6 +20,9 @@
     <string name="overcast_clouds">غائم كلياً</string>
     <string name="rain">مطر</string>
     <string name="light_rain"> أمطار خفيفه</string>
+    <string name="moderate_rain"> أمطار خفيفه</string>
+    <string name="heavy_intensity_rain">مطار شديده نسبيا</string>
+    <string name="very_heavy_rain">    امطار شديده جدا</string>
     <string name="snow">ثلجي</string>
     <string name="mist">ضباب</string>
     <string name="tornado">تورنادو</string>
@@ -34,10 +36,42 @@
     <string name="squall">سقوط</string>
     <string name="thunderstorm">عاصفة رعدية</string>
     <string name="broken_clouds">غيوم متكسرة</string>
-    <string name="feelsLike">كأنها:</string>
-    <string name="L">لصغرى</string>
+    <string name="feelsLike">تقريبا</string>
+    <string name="L">الصغرى</string>
     <string name="H">العظمى</string>
     <string name="Language">اللغه</string>
     <string name="Ar">العربيه</string>
     <string name="En">الانجليزيه</string>
+    <string name="Wind_unit">وحدة قياس الرياح</string>
+    <string name="Save">حفظ</string>
+    <string name="Temp_unit">وحدة قياس درجة الحرارة</string>
+    <string name="NoFavorites">لا يوجد اماكن مفضله</string>
+    <string name="NoAlarms">"لا بوجد  منبهات"</string>
+    <string name="mph">ميل في الساعه</string>
+    <string name="Km">كم/ساعة</string>
+    <string name="Celsius">سيليزيوس</string>
+    <string name="Fahrenheit">فاهرينهيت</string>
+    <string name="Kelvin">كلفن</string>
+    <string name="C">سيليزيوس°</string>
+    <string name="F">فاهرينهيت°</string>
+    <string name="K">كالفن°</string>
+    <string name="Home">الرئيسيه</string>
+    <string name="Settings">الضبط</string>
+    <string name="Alarms" > المنبهات </string>
+    <string name="Cancel">الغاء</string>
+    <string name="DialogConfirmation"> هل انت متأكد انك تريد حذف المكان من المفضلة ؟  </string>
+    <string name="alarmDialogConfirmation"> هل انت متأكد انك تريد حذف المنبه ؟  </string>
+    <string name="Location_Dialog_Title">اختيارات الموقع</string>
+    <string name="Location_Dialog_Message"> اختر ماذا تريد ان تفعل بالموقع ؟ </string>
+    <string name="Location_Dialog_update">تحديث الموقع واضافه الى المفضله </string>
+    <string name="Location_Dialog_Navigate">انتقل الى الموقع</string>
+    <string name="Location_Dialog_Home"> انتقل الى الرئيسية</string>
+    <string name="nointernet"> لايوجد انترنت </string>
+    <string name="connectionRestored">  تم التحقق من وجود انترنت </string>
+    <string name="NoDataForLocation">  لا توجد بيانات لهذا الموقع </string>
+    <string name="cachedText"> حسنا, سيتم عرض البيانات المخزنة</string>
+    <string name="Please_check_your_internet_connection_and_try_again">    لا يوجد انترنت , بالرجاء التحقق من اتصال الانترنت والمحاولة مرة اخرى  </string>
+    <string name="cachedSnackBar">يتم عرض البيانات المخزنة</string>
+
+
 </resources>

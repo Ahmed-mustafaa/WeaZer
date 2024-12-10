@@ -2,6 +2,7 @@ package com.example.weatherapp
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -21,77 +22,65 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class AlarmReceiver : BroadcastReceiver() {
-    private lateinit var weatherRepository: WeatherRepository
 
     override fun onReceive(context: Context?, intent: Intent?) {
         context ?: return
+        val notificationType = intent?.getStringExtra("NOTIFICATION_TYPE") ?: return
+        val alarmTime = intent?.getLongExtra("ALARM_TIME", 0) ?: 0
 
-        weatherRepository = WeatherRepository(RetrofitClient.apiService, context)
+        Log.d("AlarmReceiver", "Alarm received. Starting WeatherNotificationService.")
+        val serviceIntent = Intent(context, WeatherNotificationService::class.java)
+        serviceIntent.putExtra("NOTIFICATION_TYPE", notificationType)
+        serviceIntent.putExtra("ALARM_TIME", alarmTime)
+        // Start the service to handle the notification
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel(context)
+            context.startForegroundService(serviceIntent) // Use startForegroundService for Android 8.0+
+        } else {
+            context.startService(serviceIntent)
+        }
 
-        // Create notification channel for Android 8.0 and above
-        createNotificationChannel(context)
-
-        // Fetch weather data and show notification
-        fetchWeatherDataForCurrentLocation(context)
     }
 
     private fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
             val name = "Alarm Channel"
             val descriptionText = "Channel for Alarm Notifications"
             val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel("ALARM_CHANNEL", name, importance).apply {
+            val channel = NotificationChannel(AlarmScreen.ALARM_CHANNEL_ID, name, importance).apply {
                 description = descriptionText
             }
             val notificationManager = context.getSystemService(NotificationManager::class.java)
             notificationManager?.createNotificationChannel(channel)
         }
+        rescheduleAlarm(context)
+
     }
-
-    @SuppressLint("DefaultLocale")
-    private fun fetchWeatherDataForCurrentLocation(context: Context) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                // Fetch the weather data from the repository
-                val weatherResponse = weatherRepository.getCurrenWeather(Utils.API_KEY)
-                val weatherInfo = weatherResponse.weatherList.firstOrNull()?.main?.feels_like?.toString()
-                    ?: "Unable to fetch weather data"
-
-                // Display the weather notification
-                displayWeatherNotification(context, weatherInfo)
-            } catch (e: Exception) {
-                Log.e("AlarmReceiver", "Failed to fetch weather data: ${e.message}")
-            }
+    @SuppressLint("ScheduleExactAlarm")
+     fun rescheduleAlarm(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("NOTIFICATION_TYPE", "AUTO")
+            putExtra("ALARM_TIME", System.currentTimeMillis())
         }
-    }
-
-    private fun displayWeatherNotification(context: Context, weatherInfo: String) {
-        // Intent to open the main activity when notification is clicked
-        val mainIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Build notification
-        val builder = NotificationCompat.Builder(context, "ALARM_CHANNEL")
-            .setSmallIcon(R.drawable.clouds)
-            .setContentTitle("Weather Update")
-            .setContentText("Current Weather: $weatherInfo")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
+        // Set the next trigger time to 1 minute from now
+        val nextTriggerTime = System.currentTimeMillis() + 3 * 60 *60 * 1000 // 3 Hours in milliseconds
 
-        // Check and request notification permission for Android 13+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            Log.e("AlarmReceiver", "POST_NOTIFICATIONS permission not granted")
-            return
-        }
+        // Reset the alarm using setExactAndAllowWhileIdle
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            nextTriggerTime,
+            pendingIntent
+        )
 
-        // Show notification
-        val notificationManager = NotificationManagerCompat.from(context)
-        notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
+        Log.d("AlarmReceiver", "Alarm rescheduled for 3 hours from Now .")
     }
 }

@@ -6,12 +6,15 @@
     android:layout_height="wrap_content">
 
     <com.google.android.material.circularreveal.cardview.CircularRevealCardView
-        android:layout_width="346dp"
-        android:layout_height="72dp"
-        android:layout_marginTop="36dp"
-        android:backgroundTint="#16423C"
+        style="@style/CustomCardViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="16dp"
+        android:elevation="10dp"
+        android:paddingBottom="10dp"
+        app:cardBackgroundColor="#4D555866"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.448"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -19,10 +22,45 @@
             android:id="@+id/formattedTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="50dp"
-            android:layout_marginTop="20dp"
-            android:text="Friday - 11/8/2024 - 8:45 am "
-            android:textColor="#F5F5F5"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="0dp"
+
+            android:text="Friday \t"
+
+            android:textColor="#0E0707"
             android:textSize="20sp"></TextView>
+        <TextView
+            android:id="@+id/Day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="50dp"
+
+            android:text="00:00:00 \t"
+
+            android:textColor="#0E0707"
+            android:textSize="20sp"></TextView>
+        <FrameLayout
+            android:id="@+id/toggle_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/toggle_background"
+            android:padding="4dp"
+            android:layout_marginStart="320dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <View
+                android:id="@+id/toggle_slider"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/tick_circle"
+                android:layout_gravity="start"
+                android:backgroundTint="@color/black"
+                android:layout_marginStart="20dp"
+                android:elevation="4dp" />
+        </FrameLayout>
+
     </com.google.android.material.circularreveal.cardview.CircularRevealCardView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

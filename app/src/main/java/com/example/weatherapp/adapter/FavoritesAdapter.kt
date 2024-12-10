@@ -2,19 +2,23 @@ package com.example.weatherapp.adapter
 
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherapp.R
 import com.example.weatherapp.model.ForCast
-import com.example.weatherapp.model.WeatherList
 import com.google.android.material.circularreveal.cardview.CircularRevealCardView
 import java.util.Calendar
 
-class FavoritesAdapter(private var favoriteItemsList:List<ForCast>):RecyclerView.Adapter<FavoritesViewHolder>() {
+class FavoritesAdapter(private var favoriteItemsList:List<ForCast>,
+                       private val context: Context
+
+):RecyclerView.Adapter<FavoritesViewHolder>() {
     private val DAY_START_HOUR = 6
     private val DAY_END_HOUR = 18
 
@@ -30,9 +34,10 @@ class FavoritesAdapter(private var favoriteItemsList:List<ForCast>):RecyclerView
         val weather = favoriteItemsList[position]
         holder.cityName.text = weather.city.name
         holder.DisplayTemp.text = "${weather.weatherList[0].main.temp.toInt()}°C"
-/*
-        holder.timeDisplay.text = weather.weatherList[0].dt_txt
-*/
+        val sharedPreferences = context.getSharedPreferences("myPrefs", Context.MODE_PRIVATE)
+        val cityNameFromSharedPrefs = sharedPreferences.getString("fullLocation", null)
+        val cityName = cityNameFromSharedPrefs ?: weather.city.name
+        holder.cityName.text = cityName
         val calendar = Calendar.getInstance()
         val hourOfDay = calendar.get(Calendar.HOUR_OF_DAY)
         val isDayTime = hourOfDay in DAY_START_HOUR..DAY_END_HOUR

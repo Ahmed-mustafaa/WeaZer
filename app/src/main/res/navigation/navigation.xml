@@ -4,34 +4,60 @@
     xmlns:tools="http://schemas.android.com/tools"
     app:startDestination="@id/Alarm">
 
+    <!-- No startDestination specified; MainActivity is the start destination -->
+    <!-- The MainActivity is now responsible for navigating to fragments -->
+<activity
+    android:id="@+id/Home"
+    android:name="com.example.weatherapp.MainActivity"
+    tools:layout="@layout/activity_main">
+</activity>
     <fragment
         android:id="@+id/Alarm"
         android:name="com.example.weatherapp.AlarmScreen"
         tools:layout="@layout/alarm_screen">
+        <action
+            android:id="@+id/action_alarm_to_main"
+            app:popUpTo="@id/Alarm"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_Alarm_to_Home"
+            app:destination="@id/Home" />
+        <action
+            android:id="@+id/action_mapsFragment_to_favoritesFragment"
+            app:destination="@id/favorites" />
     </fragment>
-   
+
     <fragment
         android:id="@+id/favorites"
         android:name="com.example.weatherapp.FavoritesFragment"
-        tools:layout="@layout/activity_favorites" >
+        tools:layout="@layout/activity_favorites">
         <action
-            android:id="@+id/action_favoritesFragment_to_mapsFragment"
-            app:destination="@id/mapsFragment" />
+            android:id="@+id/action_mapsFragment_to_favoritesFragment"
+            app:destination="@id/favorites"
+            />
+        <action
+            android:id="@+id/action_favorites_to_Home"
+            app:destination="@id/Home" />
+
     </fragment>
+
     <fragment
         android:id="@+id/settings"
         android:name="com.example.weatherapp.SettingsFragment"
-        tools:layout="@layout/settingsscreen"
-        />
+        tools:layout="@layout/settingsscreen" />
+
     <fragment
         android:id="@+id/mapsFragment"
         android:name="com.example.weatherapp.MapsFragment"
-        tools:layout="@layout/fragment_maps" >
-
-    <!-- Define any actions or arguments if needed -->
+        tools:layout="@layout/fragment_maps">
         <action
-            android:id="@+id/action_mapsFragment_to_favorites"
+            android:id="@+id/action_mapsFragment_to_favoritesFragment"
             app:destination="@id/favorites" />
+
+            <action
+                android:id="@+id/action_mapsFragment_to_Home"
+                app:destination="@id/Home" />
+
     </fragment>
 
 </navigation>

@@ -1,18 +1,19 @@
-package com.example.weatherapp
-
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
+import com.example.weatherapp.AlarmScreen
+import com.example.weatherapp.model.FavoriteLocation
 import com.example.weatherapp.model.ForCast
 import com.google.gson.Gson
 
-class SharedPrefs private constructor(context: Context){
+class SharedPrefs  constructor(context: Context) {
     private val preferences = context.getSharedPreferences("myprefs", Context.MODE_PRIVATE)
+    private val gson = Gson()
+    companion object {
+        private const val SHARED_PREFS_NAME = "myprefs"
+        private const val AlarmsSHARED_PREFS_NAME = "alarms_prefs"
+        private const val KEY_CITIES = "favoriteWeatherList"
+        private const val KEY_Alarms = "Alarm"
+        private const val KEY_ALARM = "isAlarmAdded"
 
-    companion object{
-
-        private const val SHARED_PREFS_NAME= "myprefs"
-        private const val KEY_CITIES = "cities"
         private var instance: SharedPrefs? = null
 
         fun getInstance(context: Context): SharedPrefs {
@@ -22,35 +23,48 @@ class SharedPrefs private constructor(context: Context){
             return instance!!
         }
     }
+    fun getCachedWeather(): ForCast? {
+        val weatherJson = preferences.getString("cached_weather", null)
+        return if (weatherJson != null) {
+            gson.fromJson(weatherJson, ForCast::class.java)
+        } else {
+            null
+        }
+    }
+    fun clearCachedWeather() {
+        preferences.edit().remove("cached_weather").apply()
+    }
+    fun isAlarmAdded(): Boolean {
+        return preferences.getBoolean(KEY_ALARM, false)
+    }
+    fun setAlarmAdded(value: Boolean) {
+        preferences.edit().putBoolean(KEY_ALARM, value).apply()
 
-    private val prefs: SharedPreferences by lazy {
-        context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+    }
+    fun saveWeather(weather: ForCast) {
+        val weatherJson = Gson().toJson(weather)
+        preferences.edit().putString("cached_weather", weatherJson).apply()
     }
 
-    // Store a list of favorite cities
-    fun setCities(cities: Set<String>) {
-        prefs.edit().putStringSet(KEY_CITIES, cities).apply()
-    }
-    fun addCity(city: String,lat:String,lon:String) {
-        val editor = preferences.edit()
-        val cities = preferences.getStringSet("favorite_cities", mutableSetOf())?.toMutableSet() ?: mutableSetOf()
-        val cityData = "$city,$lat,$lon"
-        cities.add(cityData)
-        cities.add(city) // Add city to the set
-        editor.putStringSet("favorite_cities", cities) // Save updated set
-        editor.apply() // Commit changes
-    }
+    // Add a removeCity function to delete a specific city from favorites
+    fun removeCity(cityName: String) {
+        val favoriteCitiesJson = preferences.getString(KEY_CITIES, null)
+        if (!favoriteCitiesJson.isNullOrEmpty()) {
+            val favoriteCities = Gson().fromJson(favoriteCitiesJson, Array<FavoriteLocation>::class.java).toMutableList()
+            favoriteCities.removeAll { it.cityName == cityName }
 
+            preferences.edit().putString(KEY_CITIES, Gson().toJson(favoriteCities)).apply()
 
-
-    // Retrieve the list of favorite cities
-    fun getCities(): MutableSet<String>? {
-        return prefs.getStringSet(KEY_CITIES, null)
+        }
     }
+   /* fun removeAlarm() {
+        val AlarmJson = preferences.getString(KEY_Alarms, null)
+        if (!AlarmJson.isNullOrEmpty()) {
+            val Alarmms = Gson().fromJson(AlarmJson, Array<AlarmScreen.Alarm>::class.java).toMutableList()
+            Alarmms.removeAll { it. == cityName }
 
-    // Clear all shared preferences
-    fun clearPrefs() {
-        prefs.edit().clear().apply()
-    }
+            preferences.edit().putString(KEY_CITIES, Gson().toJson(AlarmJson)).apply()
+
+        }
+    }*/
 }
-

@@ -1,5 +1,6 @@
 package com.example.weatherapp.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,14 +10,23 @@ import com.example.weatherapp.R
 
 class SuggestionAdapter(
     private var suggestions: List<String>,
-    private val onItemClick: (String) -> Unit
+    private val onClick: (String) -> Unit
 ) : RecyclerView.Adapter<SuggestionAdapter.SuggestionViewHolder>() {
 
-    class SuggestionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val suggestionText: TextView = itemView.findViewById(R.id.suggestion_text)
-    }
+  inner  class SuggestionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+            private val suggestionTextView: TextView = itemView.findViewById(R.id.suggestion_text)
+
+            fun bind(suggestion: String) {
+                suggestionTextView.text = suggestion
+                itemView.setOnClickListener {
+                    onClick(suggestion)
+                    Log.d("SuggestionAdapter", "Suggestion clicked: $suggestion")
+                }
+            }
+        }
     fun updateData(newSuggestions: List<String>) {
-        this.suggestions = newSuggestions
+        suggestions = newSuggestions
         notifyDataSetChanged()
     }
 
@@ -27,10 +37,11 @@ class SuggestionAdapter(
     }
 
     override fun onBindViewHolder(holder: SuggestionViewHolder, position: Int) {
-        val suggestion = suggestions[position]
-        holder.suggestionText.text = suggestion
-        holder.itemView.setOnClickListener { onItemClick(suggestion) }
+      holder.bind(suggestions[position])
+
     }
 
-    override fun getItemCount() = suggestions.size
+    override fun getItemCount(): Int  = suggestions.size
+
+
 }

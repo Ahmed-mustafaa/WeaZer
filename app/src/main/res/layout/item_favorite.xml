@@ -1,48 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    >
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
 
     <com.google.android.material.circularreveal.cardview.CircularRevealCardView
         android:id="@+id/favItem"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        app:cardBackgroundColor="#A8555866">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="16dp"
+        android:elevation="10dp"
+        android:paddingBottom="10dp"
+        app:cardBackgroundColor="#4D555866"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:orientation="horizontal"
+        <TextView
+            android:id="@+id/CityName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:gravity="center_vertical">
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/alata"
+            android:text="CITY"
+            android:textColor="@color/white"
+            android:textSize="34sp" />
 
-            <!-- City Name Text -->
-            <TextView
-                android:id="@+id/CityName"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:fontFamily="@font/alata"
-                android:text="CITY"
-                android:textColor="@color/white"
-                android:textSize="40sp" />
+        <TextView
+            android:id="@+id/DisplayTemp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="120dp"
+            android:layout_marginTop="55dp"
+            android:background="#43AA1818"
+            android:backgroundTint="#43AA1818"
+            android:fontFamily="@font/alata"
+            android:text="tempo"
+            android:textColor="@color/Primary"
+            android:textSize="20sp" />
 
-            <!-- Delete Icon -->
-            <ImageView
-                android:id="@+id/deleteIcon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="8dp"
-                android:src="@drawable/trash"
-            android:contentDescription="Delete Icon"
-             />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/Time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="250dp"
+            android:layout_marginTop="55dp"
+            android:background="#396E6A6A"
+            android:fontFamily="@font/alata"
+            android:text="time"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
 
     </com.google.android.material.circularreveal.cardview.CircularRevealCardView>
 
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,7 +1,9 @@
 package com.example.weatherapp.model
-
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.Parcelize
 
+@Parcelize
 data class ForCast(
     @SerializedName("cod")
     val cod: String,
@@ -13,4 +15,4 @@ data class ForCast(
     val weatherList: List<WeatherList>,
     @SerializedName("city")
     val city: City
-)
+) : Parcelable

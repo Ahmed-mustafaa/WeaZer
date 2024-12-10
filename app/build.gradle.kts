@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id ("kotlin-kapt")
     id ("androidx.navigation.safeargs.kotlin")
+    id("kotlin-parcelize")
+
 }
 
 android {
@@ -14,10 +16,12 @@ android {
 
     defaultConfig {
         applicationId = "com.example.weatherapp"
-        minSdk = 24
-        targetSdk = 34
+        minSdk = 26
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
+        vectorDrawables.useSupportLibrary = true
+
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -58,14 +62,13 @@ dependencies {
     implementation(libs.androidx.games.activity)
     implementation(libs.androidx.fragment)
     implementation(libs.androidx.ui.desktop)
-    implementation(libs.firebase.firestore)
     implementation(libs.androidx.swiperefreshlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     val navVersion = "2.8.3"
 
-
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 // Views/Fragments Integration
     implementation("androidx.navigation:navigation-fragment:$navVersion")
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
@@ -88,8 +91,7 @@ dependencies {
     implementation("com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2")
     implementation ("com.google.android.gms:play-services-location:21.0.1")
 
-
-    // ViewModel
+    implementation("androidx.core:core-ktx:1.10.1")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
 
     // LiveData
@@ -103,5 +105,6 @@ dependencies {
 
     implementation ("org.osmdroid:osmdroid-android:6.1.10")
     implementation ("org.osmdroid:osmdroid-android:6.1.10" )// Check for the latest version
+    implementation ("com.airbnb.android:lottie:5.0.3")
 
 }

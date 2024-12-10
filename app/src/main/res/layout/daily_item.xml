@@ -2,14 +2,18 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/transparent">
+    android:layout_marginStart="0dp"
+    android:background="@android:color/transparent"
+    tools:context=".MainActivity"
+    >
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="430dp"
-        android:layout_height="79dp"
-        app:cardBackgroundColor="#63FFFEFE"
+    <com.google.android.material.card.MaterialCardView
+        style="@style/DailyCardViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -18,8 +22,7 @@
             android:id="@+id/imageDisp"
             android:layout_width="50dp"
             android:layout_height="73dp"
-            android:layout_marginStart="320dp"
-            android:layout_marginTop="0dp"
+            android:layout_gravity="end"
             android:layout_marginEnd="20dp"
             tools:srcCompat="@tools:sample/avatars"
 
@@ -27,18 +30,26 @@
 
         <TextView
             android:id="@+id/TempDisp"
-            android:layout_width="215dp"
-            android:layout_height="54dp"
-            android:layout_gravity="center"
-            android:layout_marginEnd="20dp"
+            android:layout_width="250dp"
+            android:layout_height="46dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_gravity="start"
+
             android:text="TextView" />
 
-        <com.google.android.material.divider.MaterialDivider
-            android:layout_width="match_parent"
-            android:layout_height="5dp"
-            android:layout_gravity="bottom"
-            app:dividerColor="@color/black">
 
-        </com.google.android.material.divider.MaterialDivider>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="30dp"
+        app:dividerColor="#63FFFEFE"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </com.google.android.material.divider.MaterialDivider>
 </androidx.constraintlayout.widget.ConstraintLayout>

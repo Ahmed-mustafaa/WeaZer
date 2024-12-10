@@ -2,16 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
  <item
      android:id="@+id/Home_title"
-     android:title="Home"/>
+     android:actionLayout="@layout/activity_main"
+     android:title="@string/Home" />
  <item
      android:id="@+id/Favorites_title"
-     android:title="Favorites"/>
+     android:title="@string/Favorites" />
  <item
      android:id="@+id/Settings_title"
-     android:title="Settings"/>
-<item
-    android:id="@+id/Alarm_title"
-    android:title="Alarm"/>
-
+     android:title="@string/Settings" />
+ <item
+     android:id="@+id/Alarm_title"
+     android:title="@string/Alarms" />
 
 </menu>

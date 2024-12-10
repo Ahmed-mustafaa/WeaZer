@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Calendar
 import java.util.Locale
-class DailyAdapter(private val days: List<WeatherList>) : RecyclerView.Adapter<DailyViewHolder>() {
+class DailyAdapter(private val days: List<WeatherList>,var selectedUnit: String) : RecyclerView.Adapter<DailyViewHolder>() {
 
     // Limit the data to 5 unique days
     private val dailyForecasts = days
@@ -35,12 +35,16 @@ class DailyAdapter(private val days: List<WeatherList>) : RecyclerView.Adapter<D
     override fun getItemCount(): Int {
         return dailyForecasts.size
     }
+    fun updateUnit(newUnit: String) {
+        selectedUnit = newUnit
+        notifyDataSetChanged() // Refresh the adapter to apply changes
+    }
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: DailyViewHolder, position: Int) {
         val weather = dailyForecasts[position]
-        val temp = weather.main.temp.toString()
+        val temp = weather.main.temp.toInt()
         val weatherDescription = weather.weather[0].description.capitalize()
 
         // Get the day name (Tomorrow, Monday, etc.)
@@ -59,7 +63,13 @@ class DailyAdapter(private val days: List<WeatherList>) : RecyclerView.Adapter<D
 
 
         // Display the day and temperature
-        holder.tempDisplay.text = "$displayDay - $translatedDescription - ${temp}°C"
+        val tempo = when(selectedUnit){
+            // Kelvin to Celsius
+            "Fahrenheit" -> "${((temp * 9 / 5) + 32)}°F" // celisus  to Fahrenheit
+            "Kelvin" ->     "${(temp - 32) * 5 / 9 + 273.15}°K" // Kelvin remains Kelvin
+            else -> "${temp}°C" // Default to Kelvin
+        }
+        holder.tempDisplay.text = "$displayDay - $translatedDescription - ${tempo}"
     }
 
     // Method to get the day of the week from a date string

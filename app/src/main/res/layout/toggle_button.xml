@@ -1,0 +1,19 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/toggle_background"
+    android:padding="4dp"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- The slider -->
+    <View
+        android:id="@+id/toggle_slider"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        style=""
+        android:layout_gravity="start"
+        android:layout_margin="2dp"
+        android:elevation="4dp" />
+</FrameLayout>

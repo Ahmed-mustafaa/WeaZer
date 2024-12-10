@@ -6,7 +6,6 @@
     <string name="drawer_open" translatable="false">Open drawer</string>
     <string name="drawer_close" translatable="false">Close drawer</string>
     <string name="Favorites" translatable="false">Favorites</string>
-    <string name="No_Favorite_Places" translatable="false">No Favorite Places</string>
     <string name="Location" translatable="false">Location</string>
     <string name="latitude" translatable="false">latitude</string>
     <string name="longitude" translatable="false">longitude</string>
@@ -23,6 +22,9 @@
     <string name="scattered_clouds">Scattered Clouds</string>
     <string name="overcast_clouds">Overcast Clouds</string>
     <string name="rain">rain</string>
+    <string name="moderate_rain">moderate rain</string>
+    <string name="heavy_intensity_rain">Heavy intensity rain</string>
+    <string name="very_heavy_rain">Very Heavy rain</string>
     <string name="smoke">smoke</string>
     <string name="haze">haze</string>
     <string name="dust">dust</string>
@@ -43,5 +45,35 @@
     <string name="Language">Language</string>
     <string name="Ar">Ar</string>
     <string name="En">En</string>
-    <string name="NoFavorites">"No Favorite places "</string>
+    <string name="NoFavorites">No Favorite places</string>
+    <string name="NoAlarms">No Alarms Added</string>
+    <string name="Temp_unit">Temp Unit</string>
+    <string name="Wind_unit">Wind Unit</string>
+    <string name="Save">Save</string>
+    <string name="mph">MPH</string>
+    <string name="Km">KM/HR</string>
+    <string name="Celsius">Celsius</string>
+    <string name="Fahrenheit">Fahrenheit</string>
+    <string name="C">°C</string>
+    <string name="F">°F</string>
+    <string name="K">°K</string>
+    <string name="Kelvin">Kelvin</string>
+    <string name="Home"> Home </string>
+    <string name="Settings">Settings </string>
+    <string name="Alarms">Alarms</string>
+    <string name="Cancel">Cancel</string>
+    <string name="DialogConfirmation">Are you sure you want to delete this place from favorites?</string>
+    <string name="alarmDialogConfirmation">Are you sure you want to Delete Alarm?</string>
+    <string name="Location_Dialog_Title">Location Options</string>
+    <string name="Location_Dialog_Message">Choose an option for this location</string>
+    <string name="Location_Dialog_update">Update Location and go to Favorites</string>
+    <string name="Location_Dialog_Navigate">Navigate to location</string>
+    <string name="Location_Dialog_Home">Update Location</string>
+    <string name="NoDataForLocation">No Data for this Location</string>
+    <string name="Please_check_your_internet_connection_and_try_again">Please check your internet connection and try again</string>
+    <string name="nointernet">No Internet Connection </string>
+    <string name="connectionRestored"> Connection restored </string>
+    <string name="cachedText">Aright , Fetching Cached data</string>
+    <string name="cachedSnackBar">"Displaying cached data"</string>
+
 </resources>
