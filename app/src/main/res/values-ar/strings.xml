@@ -46,7 +46,7 @@
     <string name="Save">حفظ</string>
     <string name="Temp_unit">وحدة قياس درجة الحرارة</string>
     <string name="NoFavorites">لا يوجد اماكن مفضله</string>
-    <string name="NoAlarms">"لا بوجد  منبهات"</string>
+    <string name="NoAlarms">"لا يوجد  منبهات"</string>
     <string name="mph">ميل في الساعه</string>
     <string name="Km">كم/ساعة</string>
     <string name="Celsius">سيليزيوس</string>
@@ -72,6 +72,13 @@
     <string name="cachedText"> حسنا, سيتم عرض البيانات المخزنة</string>
     <string name="Please_check_your_internet_connection_and_try_again">    لا يوجد انترنت , بالرجاء التحقق من اتصال الانترنت والمحاولة مرة اخرى  </string>
     <string name="cachedSnackBar">يتم عرض البيانات المخزنة</string>
+    <string name="ManualAlarmUpdate">ما تعبرنا يا مدمرنا </string>
+    <string name="AlarmUpdates">درجة الحرارة الان</string>
+    <string name="its">  انها :</string>
+    <string name="ThreeHours">لقد مر ٣ ساعات</string>
+    <string name="Yes">نعم</string>
+    <string name="Today">اليوم</string>
+
 
 
 </resources>

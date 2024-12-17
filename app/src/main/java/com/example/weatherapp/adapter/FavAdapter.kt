@@ -10,6 +10,7 @@ import android.util.Log
 import com.example.weatherapp.R
 import com.example.weatherapp.databinding.ItemFavoriteBinding
 import com.example.weatherapp.model.ForCast
+import java.io.IOException
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -28,7 +29,7 @@ class FavAdapter(private val Cities: MutableList<ForCast>,  private val context:
 
 
     override fun onBindViewHolder(holder: FavAdapter.FavViewHolder, position: Int) {
-        holder.bind(Cities[position],position,holder)
+        holder.bind(Cities[position], position, holder)
         val weather = Cities[position]
         val cityName = weather.city.name
 
@@ -37,21 +38,50 @@ class FavAdapter(private val Cities: MutableList<ForCast>,  private val context:
         val geocoder = Geocoder(context, Locale.getDefault())
 
 // This will search for the city name and try to get a list of addresses matching it
-        val addresses = geocoder.getFromLocationName(cityName, 10) // You can adjust the maxResults as needed
+        try {
+            val addresses =
+                geocoder.getFromLocationName(
+                    cityName,
+                    30
+                ) // You can adjust the maxResults as needed
+            val selectedAddress = addresses!!.find { address ->
+                        address.featureName?.equals(cityName, ignoreCase = true) == true ||
+                        address.locality?.equals(cityName, ignoreCase = true) == true ||
+                        address.subAdminArea?.equals(cityName, ignoreCase = true) == true ||
+                        address.adminArea?.equals(cityName, ignoreCase = true) == true ||
+                        address.countryName?.equals(cityName, ignoreCase = true) == true
+            }
+            Log.i("AddressFromFAVADAPTER","${selectedAddress}")
 
-        val location = if (addresses.isNullOrEmpty()) {
-            "Location not found" // Fallback if no address is found
-        } else {
-            // Get the first result and create a string with the full address
-            val selectedAddress = addresses[0]
-            val city = selectedAddress.adminArea ?: "Unknown Admin Area"
-            val country = selectedAddress.countryName ?: "Unknown Country"
+            val location = if (addresses.isEmpty()) {
+                val validAddress = addresses.find { address ->
+                            address.featureName?.equals(cityName, ignoreCase = true) == true ||
+                            address.locality?.equals(cityName, ignoreCase = true) == true ||
+                            address.subAdminArea?.equals(cityName, ignoreCase = true) == true ||
+                            address.adminArea?.equals(cityName, ignoreCase = true) == true ||
+                            address.countryName?.equals(cityName, ignoreCase = true) == true
+                }
 
-            // Combine these parts into a single string
-            "$city, $country"        }
+                // If a valid address is found, extract meaningful details
+                validAddress?.let { address ->
+                    val city =    address.featureName ?:address.locality ?: address.subAdminArea ?: address.adminArea?: address.countryName?:"Unknown City"
+                    val country = address.countryName ?: "Unknown Country"
+                    "$city, $country"
+                }
+            } else {
+                Log.i("Mafish yb2a gettin elsee ","${addresses[0]}")
+                val selectedAddress = addresses[0]
+                val city =    selectedAddress.featureName ?:selectedAddress.locality ?: selectedAddress.subAdminArea?: selectedAddress.adminArea  ?: selectedAddress.countryName
+                val country = selectedAddress.countryName ?: "Unknown Country"
+                // Combine these parts into a single string
+               if (city.isNullOrEmpty()) country else "$city, $country"
+            }
 
 // Set the city name or full address in the TextView
-        holder.cityNameTextView.text = location
+        holder.cityNameTextView.text = location ?: cityName
+        }catch (e: IOException){
+            e.printStackTrace()
+        }
         Log.i("weather",weather.weatherList[position].dt_txt.toString())
         val sharedPrefs = holder.itemView.context.getSharedPreferences("current_locale", Context.MODE_PRIVATE)
         val TempSharedUnit = holder.itemView.context.getSharedPreferences("weatherprefs", Context.MODE_PRIVATE)

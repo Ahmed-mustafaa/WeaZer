@@ -52,20 +52,36 @@ holder.bind(alarms.elementAt(position))
         private fun getDayName(date: String, pattern: String): String {
             return try {
                 val formatter = SimpleDateFormat(pattern, Locale.getDefault())
-                val date = formatter.parse(date)
-                val calendar = Calendar.getInstance().apply { time = date }
-                calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault())
+                val parsedDate = formatter.parse(date) ?: return ""
+                val calendar = Calendar.getInstance().apply { time = parsedDate  }
+                val todayCalendar = Calendar.getInstance()
+                val Tommorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
+
+                if (calendar.get(Calendar.YEAR) == todayCalendar.get(Calendar.YEAR) &&
+                    calendar.get(Calendar.DAY_OF_YEAR) == todayCalendar.get(Calendar.DAY_OF_YEAR)) {
+                    itemView.context.getString(R.string.Today)
+                }
+                else if (calendar.get(Calendar.YEAR) == Tommorrow.get(Calendar.YEAR)){
+                    itemView.context.getString(R.string.Tomorrow)
+
+                }
+
+                else {
+                    calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault())
+                }
+
             } catch (e: ParseException) {
                 Log.e("AlarmAdapter", "Date parsing error: ${e.message}")
                 "" // Or handle the error appropriately
             }
         }
 
-        private fun getDate(date: String, pattern: String): String {
+        private fun getTimeOnly(date: String, pattern: String): String {
             return try {
                 val formatter = SimpleDateFormat(pattern, Locale.getDefault())
-                val date = formatter.parse(date)
-                SimpleDateFormat("EEE dd-MM-yyyy-HH:mm a", Locale.getDefault()).format(date)
+                val parsedDate = formatter.parse(date) ?: return "" // Ensure date is not null
+                // Format only the time (e.g., 07:00 AM)
+                SimpleDateFormat("hh:mm a", Locale.getDefault()).format(parsedDate)
             } catch (e: ParseException) {
                 Log.e("AlarmAdapter", "Date parsing error: ${e.message}")
                 "" // Or handle the error appropriately
@@ -74,31 +90,38 @@ holder.bind(alarms.elementAt(position))
 
         @SuppressLint("SuspiciousIndentation")
         fun bind(alarm: AlarmScreen.Alarm) {
-            val day = getDayName(alarm.formattedTime, "EEE dd-MM-yyyy-HH:mm a")
+            val inputPattern = "dd/MM/yyyy HH:mm a"
+            val day = getDayName(alarm.formattedTime, inputPattern)
             Log.d("AlarmAdapter", "Day: $day")
             alarmTimeTextView.text = day
-            val date = getDate(alarm.formattedTime, "EEE dd-MM-yyyy-HH:mm a")
+            val date = getTimeOnly(alarm.formattedTime, inputPattern)
             Log.d("AlarmAdapter", "Date: $date")
             dayText.text = date
             var isAlarmActive: Boolean
             toggleButton.isSelected = alarm.isActive
-
             toggleButton.setOnClickListener {
-                isAlarmActive = toggleButton.isSelected
-                // Animate slider movement
-                val endTranslation = if (isAlarmActive) toggleButton.width - toggleSlider.width - 8 else 0
-                toggleSlider.
-                animate()
-                    .translationX(endTranslation.toFloat())
-                    .setDuration(200)
-                    .start()
-                if (isAlarmActive) toggleSlider.background
-                // Change background state
+                alarm.isActive = !alarm.isActive
+                val isAlarmActive = toggleButton.isSelected
 
-                    // Trigger callback to handle alarm setting/canceling
+                // Animate slider movement
+                val endTranslation = if (isAlarmActive) toggleButton.width - toggleSlider.width - 7 else 0
+                toggleSlider.animate()
+                    .translationX(endTranslation.toFloat()) // Move slider
+                    .setDuration(100)
+
+                // Change background based on the alarm state (only after the animation)
+                if (isAlarmActive) {
+                    toggleSlider.animate().start()
+                    toggleSlider.background // Replace with your active background
+                } else {
+                    toggleSlider.background  = toggleButton.background // Replace with your inactive background
+                }
+
+                // Trigger callback to handle alarm setting/canceling
                 onToggleChanged(alarm, isAlarmActive)
+
                 // Update the toggle button selected state
-                toggleButton.isSelected = !isAlarmActive
+                toggleButton.isSelected = isAlarmActive
                 }// Trigger the callback function
             }
         }

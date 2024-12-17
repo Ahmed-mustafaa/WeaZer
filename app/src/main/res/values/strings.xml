@@ -15,7 +15,7 @@
     <string name="AirQuality" translatable="false">Air Quality</string>
     <string name="Uv" translatable="false">Ultra Violent</string>
     <string name="Tomorrow" translatable="false">Tomorrow</string>
-    <string name="feelsLike" translatable="false">Feels Like:</string>
+    <string name="feelsLike" translatable="false">Feels Like</string>
     <string name="Broken" translatable="false">broken</string>
     <string name="clear_sky">Clear Sky</string>
     <string name="few_clouds">Few Clouds</string>
@@ -68,12 +68,19 @@
     <string name="Location_Dialog_Message">Choose an option for this location</string>
     <string name="Location_Dialog_update">Update Location and go to Favorites</string>
     <string name="Location_Dialog_Navigate">Navigate to location</string>
-    <string name="Location_Dialog_Home">Update Location</string>
+    <string name="Location_Dialog_Home">Go to Home screen</string>
     <string name="NoDataForLocation">No Data for this Location</string>
     <string name="Please_check_your_internet_connection_and_try_again">Please check your internet connection and try again</string>
     <string name="nointernet">No Internet Connection </string>
     <string name="connectionRestored"> Connection restored </string>
     <string name="cachedText">Aright , Fetching Cached data</string>
     <string name="cachedSnackBar">"Displaying cached data"</string>
+    <string name="ManualAlarmUpdate">Weather Reminder</string>
+    <string name="AlarmUpdates">Temperature is:</string>
+    <string name="its">it is :</string>
+    <string name="ThreeHours">"It has been 3 hours"</string>
+    <string name="Yes">Yes</string>
+    <string name="Today">Today</string>
+
 
 </resources>

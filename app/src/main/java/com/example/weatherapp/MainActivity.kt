@@ -14,41 +14,27 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import android.Manifest
-import android.app.usage.NetworkStatsManager
 import android.content.IntentFilter
-import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
+import android.graphics.Color
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.Uri
-import android.net.wifi.WifiManager
 import android.os.PowerManager
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.NonNull
-import androidx.annotation.RequiresApi
-import androidx.annotation.RequiresExtension
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.airbnb.lottie.LottieDrawable
 import com.example.weatherapp.adapter.DailyAdapter
 import com.example.weatherapp.adapter.WeatherTodayAdapter
 import com.example.weatherapp.databinding.ActivityMainBinding
@@ -61,17 +47,15 @@ import com.example.weatherapp.weatherRepository.WeatherRepository
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
 import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
@@ -91,6 +75,8 @@ class MainActivity : AppCompatActivity() {
     private val REQUEST_CODE_POST_NOTIFICATIONS = 1001
     private val LOCATION_REQUEST_CODE = 1001
     private var cityNameFromFragment: String? = null
+    private val ALarm_PREFS_NAME = "alarmPrefs"
+    private val ALARM_SET_KEY = "alarmSet"
 
     private var isArabic = Locale.getDefault().language == "ar"
 
@@ -100,6 +86,7 @@ class MainActivity : AppCompatActivity() {
     private var connectionDialog: AlertDialog? = null
 
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -132,70 +119,78 @@ class MainActivity : AppCompatActivity() {
 
         drawerLayout.addDrawerListener(drawerToggle)
         drawerToggle.syncState()
+        drawerLayout.setScrimColor(Color.TRANSPARENT)
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
         val navigationView : NavigationView = binding.navigationView
         navigationView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.Home_title -> {
-                    binding.toolbar.title = getString(R.string.Home)
-                    binding.mainLayout.visibility = View.VISIBLE
-                    binding.navHostFragment.visibility = View.GONE
-                    binding.navigationView.visibility = View.GONE
-                    navController.popBackStack()
-                    drawerLayout.closeDrawer(GravityCompat.START)
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
+                    if(!NetworkUtils.isNetworkAvailable(this))
+                        showSnackbar(getString(R.string.Please_check_your_internet_connection_and_try_again))
+                    else {
+                        binding.toolbar.title = getString(R.string.Home)
+                        binding.mainLayout.visibility = View.VISIBLE
+                        binding.navHostFragment.visibility = View.GONE
+                        binding.navigationView.visibility = View.GONE
+                        navController.popBackStack()
+                        drawerLayout.closeDrawer(GravityCompat.START)
+                        val intent = Intent(this, MainActivity::class.java)
+                        startActivity(intent)
+                    }
                     true
                 }
 
                 R.id.Alarm_title -> {
                     // Navigate to Alarm Fragment
-                    binding.toolbar.title = getString(R.string.Alarms)
-                    binding.back.visibility = View.VISIBLE
-
-                    binding.mainLayout.visibility = View.GONE
-                    /*
-                    binding.fragmentContainerView.visibility = View.VISIBLE
-*/
-                    binding.navHostFragment.visibility = View.VISIBLE
-                    binding.navigationView.visibility = View.VISIBLE
-
-                    navController.navigate(R.id.Alarm)
-                    drawerLayout.closeDrawer(GravityCompat.START)
-
+                    if(!NetworkUtils.isNetworkAvailable(this))
+                        showSnackbar(getString(R.string.Please_check_your_internet_connection_and_try_again))
+                    else {
+                        binding.toolbar.title = getString(R.string.Alarms)
+                        binding.back.visibility = View.VISIBLE
+                        binding.mainLayout.visibility = View.GONE
+                        binding.navHostFragment.visibility = View.VISIBLE
+                        binding.navigationView.visibility = View.VISIBLE
+                        navController.navigate(R.id.Alarm)
+                        drawerLayout.closeDrawer(GravityCompat.START)
+                    }
                     true
                 }
 
                 R.id.Favorites_title -> {
                     // Navigate to Favorites
-                    binding.toolbar.title = getString(R.string.Favorites)
-                    binding.back.visibility = View.VISIBLE
-
-                    binding.mainLayout.visibility = View.GONE
-                    binding.navHostFragment.visibility = View.VISIBLE
-                    binding.navigationView.visibility = View.VISIBLE
-                    navController.navigate(
-                        R.id.favorites, null, NavOptions.Builder()
-                            .setPopUpTo(
-                                R.id.drawer,
-                                inclusive = false
-                            ) // Clear back stack up to mainScreen
-                            .build()
-                    )
-                    drawerLayout.closeDrawer(GravityCompat.START)
+                    if(!NetworkUtils.isNetworkAvailable(this))
+                        showSnackbar(getString(R.string.Please_check_your_internet_connection_and_try_again))
+                    else {
+                        binding.toolbar.title = getString(R.string.Favorites)
+                        binding.back.visibility = View.VISIBLE
+                        binding.mainLayout.visibility = View.GONE
+                        binding.navHostFragment.visibility = View.VISIBLE
+                        binding.navigationView.visibility = View.VISIBLE
+                        navController.navigate(
+                            R.id.favorites, null, NavOptions.Builder()
+                                .setPopUpTo(
+                                    R.id.drawer,
+                                    inclusive = false
+                                ) // Clear back stack up to mainScreen
+                                .build()
+                        )
+                        drawerLayout.closeDrawer(GravityCompat.START)
+                    }
                     true
                 }
 
                 R.id.Settings_title -> {
-                    binding.toolbar.title = getString(R.string.Settings)
-                    binding.back.visibility = View.VISIBLE
-
-                    binding.mainLayout.visibility = View.GONE
-                    binding.navHostFragment.visibility = View.VISIBLE
-                    binding.navigationView.visibility = View.VISIBLE
-                    supportFragmentManager.beginTransaction()
-
-                    navController.navigate(R.id.settings)
-                    drawerLayout.closeDrawer(GravityCompat.START)
+                    if(!NetworkUtils.isNetworkAvailable(this))
+                        showSnackbar(getString(R.string.Please_check_your_internet_connection_and_try_again))
+                    else {
+                        binding.toolbar.title = getString(R.string.Settings)
+                        binding.back.visibility = View.VISIBLE
+                        binding.mainLayout.visibility = View.GONE
+                        binding.navHostFragment.visibility = View.VISIBLE
+                        binding.navigationView.visibility = View.VISIBLE
+                        navController.navigate(R.id.settings)
+                        drawerLayout.closeDrawer(GravityCompat.START)
+                    }
                     true
 
                 }
@@ -206,7 +201,7 @@ class MainActivity : AppCompatActivity() {
         setupViewModel()
 
         if(!NetworkUtils.isNetworkAvailable(this)){
-
+            showConnectToInternetDialog()
             showSnackbar(getString(R.string.Please_check_your_internet_connection_and_try_again))
         }
         else{
@@ -231,7 +226,7 @@ class MainActivity : AppCompatActivity() {
               lifecycleScope.launch {
                   showNoInternetLayout(false)
                   binding.swipeRefreshLayout.isRefreshing = true
-                  delay(300)
+                  delay(1500)
                   showSnackbar(getString(R.string.connectionRestored))
                   binding.swipeRefreshLayout.isRefreshing = false
                   connectionDialog?.dismiss()
@@ -241,41 +236,43 @@ class MainActivity : AppCompatActivity() {
             } else {
                 // Handle no connection scenario
                 lifecycleScope.launch {
-                    val job = Job()
                     connectionDialog = showConnectToInternetDialog()
                     if (connectionDialog!!.isShowing) {
                         connectionDialog?.setOnDismissListener {
                             lifecycleScope.launch {
-                                binding.CahcedText.apply {
-                                    visibility = View.VISIBLE
-                                    binding.noInternetConstraint.visibility = View.GONE
-                                    delay(500)
-                                    binding.CahcedText.visibility = View.GONE
-                                }
+                                binding.CahcedText.visibility = View.VISIBLE
+                                    delay(3000)
+                                currentLat = getSharedPreferences("myprefs", Context.MODE_PRIVATE).getFloat("latitude", 0f).toDouble()
+                                currentLon = getSharedPreferences("myprefs", Context.MODE_PRIVATE).getFloat("longitude", 0f).toDouble()
+                                fetchWeatherDataForLocation(currentLat!!, currentLon!!)
+                                observeWeatherData()
                             }
 
                         }
-                        job.cancel()
-                        job.invokeOnCompletion {
-                            showNoInternetLayout(false)
-                            lifecycleScope.launch {
-                                weatherVM.loadCachedWeather()
-                                observeWeatherData() // Fetch cached data
-                                Log.i("OnCreate", "Displaying Cached Data")
-                                showSnackbar(getString(R.string.Please_check_your_internet_connection_and_try_again))
-                                showSnackbar(getString(R.string.cachedSnackBar))
-                            }
-                        }
+
                     }
                 }
             }
         }
-
-
         setupAdapters(selectedUnit)
         requestNotificationPermission(this)
-        setupAlarm()
-        requestBatteryOptimizationPermission()
+        val sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val isAlarmSet = sharedPreferences.getBoolean(ALARM_SET_KEY, false)
+
+        // If the alarm hasn't been set, set it and mark it as set in SharedPreferences
+        if (!isAlarmSet) {
+            // Set the alarm only once
+            GlobalScope.launch { // Using GlobalScope for the suspend function
+                setupAlarm()
+
+                // Mark the alarm as set in SharedPreferences
+                with(sharedPreferences.edit()) {
+                    putBoolean(ALARM_SET_KEY, true)
+                    apply()
+                }
+            }
+        }
+       ToastUtil.requestBatteryOptimizationPermission(this)
 
 
         binding.pickuplocation.setOnClickListener {
@@ -289,36 +286,43 @@ class MainActivity : AppCompatActivity() {
         binding.swipeRefreshLayout.setOnRefreshListener {
             // Check network availabilit
             binding.swipeRefreshLayout.isRefreshing = true
-            val sharedPreferencesCity = this@MainActivity.getSharedPreferences("myPrefs", Context.MODE_PRIVATE)
-            sharedPreferencesCity.edit().remove("fullLocation").apply()
-            cityNameFromFragment = null
             lifecycleScope.launch {
                 if (NetworkUtils.isNetworkAvailable(this@MainActivity)) {
-
-                    val savedLocation = getSelectedLocation()
-                    if (savedLocation != null) {
-                        val (lat, lon) = savedLocation
-                        fetchWeatherDataForLocation(
-                            lat,
-                            lon
-                        ) // Fetch data for saved location
-
-                    } else {
-                        fetchWeatherDataForCurrentLocation()
-
+                    getCurrentLocation { currentLat, currentLon ->
+                        if (currentLat != null && currentLon != null) {
+                           fetchWeatherDataForLocation(currentLat,currentLon)
+                        } else {
+                            Log.e("MainActivity", "Failed to retrieve location.")
+                        }
                     }
+                    } else {
+                    lifecycleScope.launch {
+
+                    val sharedPreferences = getSharedPreferences("myprefs", Context.MODE_PRIVATE)
+                    val gson = Gson()
+
+// Retrieve the JSON string
+                    val forecastJson = sharedPreferences.getString("forecast", null)
+
+// Parse the JSON back into its original type
+                    val forecast: ForCast? = forecastJson?.let {
+                        gson.fromJson(it, ForCast::class.java)
+                    }
+                    if (forecast != null) {
+                        updateUI(forecast)
+                    } else
+                        showSnackbar(getString(R.string.Please_check_your_internet_connection_and_try_again))
+                }
+                }
 
 
-                } else {
-                    showSnackbar(getString(R.string.Please_check_your_internet_connection_and_try_again))
-                    binding.swipeRefreshLayout.isRefreshing = false
                 }
                 binding.swipeRefreshLayout.isRefreshing = false
 
 
             }
         }
-    }
+
     fun onBackPressedFromView(view: View) {
         val intent = Intent(this, MainActivity::class.java)
         navigateUpTo(intent)
@@ -336,7 +340,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
             supportActionBar?.hide()
-            supportActionBar?.hide()
         }
     }
     private fun requestLocationPermission() {
@@ -346,7 +349,24 @@ class MainActivity : AppCompatActivity() {
             LOCATION_REQUEST_CODE
         )
     }
+private fun offlineContent(){
 
+    val sharedPreferences = getSharedPreferences("myprefs", Context.MODE_PRIVATE)
+    val gson = Gson()
+    lifecycleScope.launch {
+// Retrieve the JSON string
+        val forecastJson = sharedPreferences.getString("forecast", null)
+
+// Parse the JSON back into its original type
+        val forecast: ForCast? = forecastJson?.let {
+            gson.fromJson(it, ForCast::class.java)
+        }
+        if (forecast != null) {
+            updateUI(forecast)
+        } else
+            showSnackbar(getString(R.string.Please_check_your_internet_connection_and_try_again))
+    }
+}
     private fun handleNetworkChange(isConnected: Boolean) {
         if (isConnected) {
             showSnackbar(getString(R.string.connectionRestored))
@@ -359,8 +379,6 @@ class MainActivity : AppCompatActivity() {
             // Take action when internet is restored (e.g., fetch fresh data)
         } else {
             showSnackbar(getString(R.string.Please_check_your_internet_connection_and_try_again))
-            binding.lottieAnimationView.visibility = View.VISIBLE
-
         }
     }
 
@@ -368,25 +386,17 @@ class MainActivity : AppCompatActivity() {
         Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
     }
 
-    @SuppressLint("BatteryLife")
-    private fun requestBatteryOptimizationPermission() {
-            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
-                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                intent.data = Uri.parse("package:$packageName")
-                startActivity(intent)
-            }
-        }
+
 
 
 
 
     @SuppressLint("ScheduleExactAlarm")
-    private fun setupAlarm() {
+    private   fun setupAlarm() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Log.i("ALarmFromMAin", "This means the SDK is Higher >  26  ")
             val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val timeInMillis = System.currentTimeMillis()
+            val timeInMillis = System.currentTimeMillis() // 10 seconds from now
             val intent = Intent(this, AlarmReceiver::class.java)
             intent.putExtra("NOTIFICATION_TYPE", "AUTO") // Mark this as a manual alarm
             intent.putExtra("ALARM_TIME", timeInMillis)
@@ -441,6 +451,8 @@ class MainActivity : AppCompatActivity() {
                 Log.d("MainActivity", "Notification permission Denied")
 
             }
+        }else{
+            promptEnableLocationServices()
         }
     }
 
@@ -491,7 +503,7 @@ class MainActivity : AppCompatActivity() {
         binding.dailyRec.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.hourlyRec.adapter = adapter
-
+        binding.dailyRec.setHasFixedSize(true)
         binding.dailyRec.adapter = Dailyadapter
     }
 
@@ -508,6 +520,8 @@ class MainActivity : AppCompatActivity() {
     private fun handleInitialLocation() {
         val latitude = intent.getDoubleExtra("latitude", 0.0)
         val longitude = intent.getDoubleExtra("longitude", 0.0)
+        val sharedPreferences = this.getSharedPreferences("myprefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
 Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
 
         when {
@@ -524,7 +538,12 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
                 // If permissions are granted, get current location
                 getCurrentLocation { currentLat, currentLon ->
                     if (currentLat != null && currentLon != null) {
-fetchWeatherDataForCurrentLocation()
+                          fetchWeatherDataForCurrentLocation()
+
+                        editor.putFloat("latitude", currentLat.toFloat())
+                        editor.putFloat("longitude", currentLon.toFloat())
+                        editor.apply()
+                        Log.i("MainActivity", "currentLat: $currentLat, currentLon: $currentLon")
                     } else {
                         Log.e("MainActivity", "Failed to retrieve location.")
                     }
@@ -535,7 +554,14 @@ fetchWeatherDataForCurrentLocation()
             }
         }
     }
-
+    private fun saveInitialLocation(latitude: Double, longitude: Double) {
+        val sharedPreferences = this.getSharedPreferences("location_prefs", Context.MODE_PRIVATE)
+        sharedPreferences.edit().apply {
+            putFloat("latitude", latitude.toFloat())
+            putFloat("longitude", longitude.toFloat())
+            apply()
+        }
+    }
     private fun getCurrentLocation(onLocationRetrieved: (Double?, Double?) -> Unit) {
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -547,11 +573,6 @@ fetchWeatherDataForCurrentLocation()
         ) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return
         }
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
@@ -632,6 +653,9 @@ fetchWeatherDataForCurrentLocation()
                     "MainActivity",
                     "Forecast received: ${it.city.coord.lat}, ${it.city.coord.lon}"
                 )
+                val forecast  = getSharedPreferences("myprefs", Context.MODE_PRIVATE).edit()
+                forecast.putString("forecast", Gson().toJson(it))
+                forecast.apply()
 
             } ?: ToastUtil.showCustomToast(this,"No weather data available")
 
@@ -667,16 +691,16 @@ fetchWeatherDataForCurrentLocation()
             if (!isArabic) {
                 binding.Temp.text =
                     when (selectedUnit) {
-                        "Celsius" -> formatNumberToArabic(convertToCelsius(Temp).roundToInt()) + getString(
+                        "Celsius" -> ToastUtil.formatNumberToArabic(ToastUtil.convertToCelsius(Temp).roundToInt()) + getString(
                             R.string.C
                         )
 
                         "Fahrenheit" ->
-                            formatNumberToArabic(convertToFahrenheit(Temp).roundToInt()) + getString(
+                            ToastUtil.formatNumberToArabic(ToastUtil.convertToFahrenheit(Temp).roundToInt()) + getString(
                                 R.string.F
                             )
 
-                        else -> formatNumberToArabic(convertToKelvin(Temp).roundToInt()) + getString(
+                        else -> ToastUtil.formatNumberToArabic(ToastUtil.convertToKelvin(Temp).roundToInt()) + getString(
                             R.string.K
                         )
                     }
@@ -684,11 +708,11 @@ fetchWeatherDataForCurrentLocation()
 
                 //English 3adi
                 binding.Temp.text = when (selectedUnit) {
-                    "Celsius" -> "${convertToCelsius(forecast.weatherList[0].main.temp).roundToInt()}" + getString(R.string.C)
+                    "Celsius" -> "${ToastUtil.convertToCelsius(forecast.weatherList[0].main.temp).roundToInt()}" + getString(R.string.C)
 
-                    "Fahrenheit" -> "${convertToFahrenheit(forecast.weatherList[0].main.temp).roundToInt()}" + getString(R.string.F)
+                    "Fahrenheit" -> "${ToastUtil.convertToFahrenheit(forecast.weatherList[0].main.temp).roundToInt()}" + getString(R.string.F)
 
-                    else -> "${convertToKelvin(forecast.weatherList[0].main.temp).roundToInt()}" + getString(R.string.K)
+                    else -> "${ToastUtil.convertToKelvin(forecast.weatherList[0].main.temp).roundToInt()}" + getString(R.string.K)
                 }
             }
             sharedPreferences.registerOnSharedPreferenceChangeListener { _, key ->
@@ -698,22 +722,22 @@ fetchWeatherDataForCurrentLocation()
                     if (!isArabic) {
                         when (selectedUnit) {
                             "Celsius" -> binding.Temp.text =
-                                formatNumberToArabic(convertToCelsius(forecast.weatherList[0].main.temp).roundToInt()) + getString(R.string.C)
+                                ToastUtil.formatNumberToArabic(ToastUtil.convertToCelsius(forecast.weatherList[0].main.temp).roundToInt()) + getString(R.string.C)
 
                             "Fahrenheit" -> binding.Temp.text =
-                                formatNumberToArabic(convertToFahrenheit(forecast.weatherList[0].main.temp).roundToInt()) + getString(R.string.F)
+                                ToastUtil.formatNumberToArabic(ToastUtil.convertToFahrenheit(forecast.weatherList[0].main.temp).roundToInt()) + getString(R.string.F)
 
                             else -> binding.Temp.text =
-                                formatNumberToArabic(convertToKelvin(forecast.weatherList[0].main.temp).roundToInt()) + getString(R.string.K)
+                                ToastUtil.formatNumberToArabic(ToastUtil.convertToKelvin(forecast.weatherList[0].main.temp).roundToInt()) + getString(R.string.K)
 
                         }
                     } else {
                         binding.Temp.text = when (selectedUnit) {
-                            "Kelvin" -> "${convertToKelvin(forecast.weatherList[0].main.temp).roundToInt()}" + getString(
+                            "Kelvin" -> "${ToastUtil.convertToKelvin(forecast.weatherList[0].main.temp).roundToInt()}" + getString(
                                 R.string.K
                             )
 
-                            "Fahrenheit" -> "${convertToFahrenheit(forecast.weatherList[0].main.temp).roundToInt()}" + getString(
+                            "Fahrenheit" -> "${ToastUtil.convertToFahrenheit(forecast.weatherList[0].main.temp).roundToInt()}" + getString(
                                 R.string.F
                             )
 
@@ -730,11 +754,11 @@ fetchWeatherDataForCurrentLocation()
             val feelsLikeTranslated =
                 forecast.weatherList[0].main.feels_like
 
-            val H = translateWeatherDescription(
+            val H = ToastUtil.translateWeatherDescription(
                 forecast.weatherList[0].main.temp_max.toString(),
                 this
             ).toDouble()
-            val L = translateWeatherDescription(
+            val L = ToastUtil.translateWeatherDescription(
                 forecast.weatherList[0].main.temp_min.toString(),
                 this
             ).toDouble()
@@ -744,13 +768,13 @@ fetchWeatherDataForCurrentLocation()
                 when (selectedUnit) {
                     "Celsius" -> {
                         binding.tempMax.text =
-                            getString(R.string.H) + " : " +formatNumberToArabic( H.toInt()) + getString(R.string.C)
+                            getString(R.string.H) + " : " +ToastUtil.formatNumberToArabic( H.toInt()) + getString(R.string.C)
                         binding.tempMin.text =
-                            getString(R.string.L) + " : " + formatNumberToArabic(L.toInt()) + getString(
+                            getString(R.string.L) + " : " + ToastUtil.formatNumberToArabic(L.toInt()) + getString(
                                 R.string.C
                             )
                         binding.tempFeelsLike.text =
-                            this.getString(R.string.feelsLike) + ": " + formatNumberToArabic(feelsLikeTranslated.toInt())+ getString(
+                            this.getString(R.string.feelsLike) + ": " + ToastUtil.formatNumberToArabic(feelsLikeTranslated.toInt())+ getString(
                                 R.string.C
                             )
 
@@ -758,40 +782,40 @@ fetchWeatherDataForCurrentLocation()
 
                     "Fahrenheit" -> {
                         binding.tempMax.text =
-                            getString(R.string.H) + " : " + formatNumberToArabic(
-                                convertToFahrenheit(
+                            getString(R.string.H) + " : " + ToastUtil.formatNumberToArabic(
+                                ToastUtil.convertToFahrenheit(
                                     H
                                 ).toInt()
                             ) + getString(
                                 R.string.F
                             )
                         binding.tempMin.text =
-                            getString(R.string.L) + " : " + formatNumberToArabic(
-                                convertToFahrenheit(
+                            getString(R.string.L) + " : " + ToastUtil.formatNumberToArabic(
+                                ToastUtil.convertToFahrenheit(
                                     L
                                 ).toInt()
                             ) + getString(
                                 R.string.F
                             )
                         binding.tempFeelsLike.text =
-                            this.getString(R.string.feelsLike) + formatNumberToArabic(
-                                convertToFahrenheit(feelsLikeTranslated).toInt()
+                            this.getString(R.string.feelsLike) + ToastUtil.formatNumberToArabic(
+                                ToastUtil.convertToFahrenheit(feelsLikeTranslated).toInt()
                             ) + getString(R.string.F)
 
                     }
 
                     else -> {
                         binding.tempMax.text =
-                            getString(R.string.H) + " : " + formatNumberToArabic(convertToKelvin(H).toInt()) + getString(
+                            getString(R.string.H) + " : " + ToastUtil.formatNumberToArabic(ToastUtil.convertToKelvin(H).toInt()) + getString(
                                 R.string.K
                             )
                         binding.tempMin.text =
-                            getString(R.string.L) + " : " + formatNumberToArabic(convertToKelvin(L).toInt()) + getString(
+                            getString(R.string.L) + " : " + ToastUtil.formatNumberToArabic(ToastUtil.convertToKelvin(L).toInt()) + getString(
                                 R.string.K
                             )
                         binding.tempFeelsLike.text =
-                            this.getString(R.string.feelsLike) + formatNumberToArabic(
-                                convertToKelvin(feelsLikeTranslated).toInt()
+                            this.getString(R.string.feelsLike) + ToastUtil.formatNumberToArabic(
+                                ToastUtil.convertToKelvin(feelsLikeTranslated).toInt()
                             ) + getString(R.string.K)
 
                     }
@@ -812,29 +836,29 @@ fetchWeatherDataForCurrentLocation()
 
                     "Fahrenheit" -> {
                         binding.tempMax.text =
-                            getString(R.string.H) + ": " + "${convertToFahrenheit(H).roundToInt()}" + getString(
+                            getString(R.string.H) + ": " + "${ToastUtil.convertToFahrenheit(H).roundToInt()}" + getString(
                                 R.string.F
                             )
                         binding.tempMin.text =
-                            getString(R.string.L) + " : " + "${convertToFahrenheit(L).roundToInt()}" + getString(
+                            getString(R.string.L) + " : " + "${ToastUtil.convertToFahrenheit(L).roundToInt()}" + getString(
                                 R.string.F
                             )
                         binding.tempFeelsLike.text = this.getString(R.string.feelsLike) + ": " + "${
-                            convertToFahrenheit(forecast.weatherList[0].main.feels_like).roundToInt()
+                            ToastUtil.convertToFahrenheit(forecast.weatherList[0].main.feels_like).roundToInt()
                         }" + getString(R.string.F)
                     }
 
                     else -> {
                         binding.tempMax.text =
-                            getString(R.string.H) + ": " + "${convertToKelvin(H).roundToInt()}" + getString(
+                            getString(R.string.H) + ": " + "${ToastUtil.convertToKelvin(H).roundToInt()}" + getString(
                                 R.string.K
                             )
                         binding.tempMin.text =
-                            getString(R.string.L) + " : " + "${convertToKelvin(L).roundToInt()}" + getString(
+                            getString(R.string.L) + " : " + "${ToastUtil.convertToKelvin(L).roundToInt()}" + getString(
                                 R.string.K
                             )
                         binding.tempFeelsLike.text =
-                            this.getString(R.string.feelsLike) + ": " + "${convertToKelvin(forecast.weatherList[0].main.feels_like).roundToInt()}" + getString(
+                            this.getString(R.string.feelsLike) + ": " + "${ToastUtil.convertToKelvin(forecast.weatherList[0].main.feels_like).roundToInt()}" + getString(
                                 R.string.K
                             )
                     }
@@ -843,7 +867,7 @@ fetchWeatherDataForCurrentLocation()
 
 
             val descriptionTranslated =
-                translateWeatherDescription(forecast.weatherList[0].weather[0].description, this)
+               ToastUtil.translateWeatherDescription(forecast.weatherList[0].weather[0].description, this)
             binding.Descriptions.text = descriptionTranslated
             Log.i(
                 "MainActivity",
@@ -854,23 +878,60 @@ fetchWeatherDataForCurrentLocation()
 
         if (forecast.weatherList.isNotEmpty()) {
             val currentWeather = forecast.weatherList[0]
+            val iconCode = forecast.weatherList[0].weather[0].icon
+            val sunrise = forecast.city.sunrise * 1000L // Convert to milliseconds
+            val sunset = forecast.city.sunset * 1000L // Convert to milliseconds
+            Log.i("MainActivity", "Sunrise: $sunrise, Sunset: $sunset")
+
+            val currentTime = System.currentTimeMillis()
+            val isDaytime = currentTime in sunrise..sunset
+
             updateWeatherDetails(currentWeather)
             binding.hourlyRec.adapter =
                 WeatherTodayAdapter(forecast.weatherList.take(8), selectedUnit)
             binding.dailyRec.adapter = DailyAdapter(forecast.weatherList, selectedUnit)
-            when (forecast.weatherList[0].weather[0].icon) {
-                "01d" -> binding.icon.setImageResource(R.drawable.sun)
-                "01n" -> binding.icon.setImageResource(R.drawable.moon)
-                "02d" -> binding.icon.setImageResource(R.drawable.clouds)
-                "02n" -> binding.icon.setImageResource(R.drawable.towon)
-                "03d", "03n" -> binding.icon.setImageResource(R.drawable.plaincouds)
-                "04d", "04n" -> binding.icon.setImageResource(R.drawable.four)
-                "09d", "09n" -> binding.icon.setImageResource(R.drawable.rainy)
-                "10d", "10n" -> binding.icon.setImageResource(R.drawable.cloudy)
-                "11d", "11n" -> binding.icon.setImageResource(R.drawable.thunder)
-                "13d", "13n" -> binding.icon.setImageResource(R.drawable.snowflake)
-                else -> binding.icon.setImageResource(R.drawable.sun) // A default icon
+            val iconResource = when {
+                isDaytime -> {
+                    binding.main.setBackgroundResource(R.drawable.clearskybackground) // Set daytime background
+                    when (iconCode) {
+                        "01d" -> R.drawable.sun // Clear sky during the day
+                        "01n" -> R.drawable.moon // Clear sky at night
+                        "02d", "02n" -> R.drawable.cloudyday // Partly cloudy
+                        "03d", "03n" -> R.drawable.plaincouds // Scattered clouds
+                        "04d", "04n" -> R.drawable.four // Overcast clouds
+                        "09d", "09n" -> R.drawable.rainy // Rain
+                        "10d", "10n" -> R.drawable.cloudy // Cloudy with rain
+                        "11d", "11n" -> R.drawable.thunder // Thunderstorm
+                        "13d", "13n" -> R.drawable.snowflake // Snow
+                        else -> R.drawable.sun // Default icon
+                    }
+                }
+
+                else -> {
+                    // Set the background based on the icon code during nighttime
+                    when (iconCode) {
+                        "01n" -> {
+                            binding.main.setBackgroundResource(R.drawable.clearskynight)
+                            R.drawable.moon
+                        }
+
+                        "02n" -> R.drawable.cloud.also {
+                            binding.main.setBackgroundResource(R.drawable.clearskynight)
+                        }
+
+                        "03n" -> R.drawable.plaincouds // Scattered clouds
+                        "04n" -> R.drawable.four // Overcast clouds
+                        "09n" -> R.drawable.rainy // Rain
+                        "10n" -> R.drawable.cloudy // Cloudy with rain
+                        "11n" -> R.drawable.thunder // Thunderstorm
+                        "13n" -> R.drawable.snowflake // Snow
+                        else -> R.drawable.moon // Default icon
+                    }
+                }
             }
+
+            binding.icon.setImageResource(iconResource)
+
             binding.lottieAnimationView.visibility = View.GONE
 
 
@@ -889,8 +950,15 @@ fetchWeatherDataForCurrentLocation()
         Log.i("TimeFromTheFragmentInMAAAIN", "Time : $Timing")
         Timing.let {
             val isPm = it >= 12
-            val normalHour = if (it % 12 == 0) 12 else it % 12
+            val normalHour = when {
+                it == 0 -> 12      // Handle midnight case
+                it == 12 -> 12     // Handle noon case
+                it > 12 -> it - 12 // For PM times, subtract 12 to convert
+                else -> it          // For AM times, no change needed
+            }
             val amPm = if (isPm) "PM" else "AM"
+            val formattedTime = "$normalHour:00 $amPm"
+            Log.i("AM/PM", "Time in 12-hour format: $formattedTime")
             "$normalHour:00 $amPm"
             Log.i("AM/PM", "Time in 12-hour format: $normalHour:00 $amPm")
 
@@ -899,7 +967,7 @@ fetchWeatherDataForCurrentLocation()
 
         // Define the start and end hours for day time
         val DAY_START_HOUR = 6  // 6 AM as a string
-        val DAY_END_HOUR =   18   // 6 PM as a string
+        val DAY_END_HOUR =   18   // 5 PM as a string
         Log.i("Time Range", "Checking if $Timing is between $DAY_START_HOUR and $DAY_END_HOUR")
 
         val isDayTime = Timing in DAY_START_HOUR..DAY_END_HOUR
@@ -907,7 +975,9 @@ fetchWeatherDataForCurrentLocation()
 
         binding.main.setBackgroundResource(
             if (isDayTime) R.drawable.clearskybackground
-            else R.drawable.clearskynight
+            else
+                R.drawable.clearskynight
+
         )
         binding.Linear.setBackgroundResource(
             if (isDayTime) R.drawable.clearskybackground
@@ -917,21 +987,7 @@ fetchWeatherDataForCurrentLocation()
     }
 
 
-    private fun convertToCelsius(temp: Double): Double {
-        return temp
-    }
 
-    private fun convertToFahrenheit(temp: Double): Double {
-        return (temp * 9 / 5) + 32
-    }
-
-    private fun convertToKelvin(temp: Double): Double {
-        return (temp - 32) * 5 / 9 + 273.15
-    }
-
-    private fun convertToMPH(speed: Double): Double {
-        return speed * 0.621371
-    }
     private fun updateLocale() {
         val sharedPreferences = getSharedPreferences("current_locale", Context.MODE_PRIVATE)
         val languageCode = sharedPreferences.getBoolean("isArabic", false) // Default to English
@@ -946,39 +1002,6 @@ fetchWeatherDataForCurrentLocation()
         resources.updateConfiguration(configuration, resources.displayMetrics)
     }
 
-    private  fun translateWeatherDescription(description: String, context: Context): String {
-        return when (description.toLowerCase(Locale.getDefault())) {
-            "clear sky" -> context.getString(R.string.clear_sky)
-            "few clouds" -> context.getString(R.string.few_clouds)
-            "scattered clouds" -> context.getString(R.string.scattered_clouds)
-            "overcast clouds" -> context.getString(R.string.overcast_clouds)
-            "rain" -> context.getString(R.string.rain)
-            "thunderstorm" -> context.getString(R.string.thunderstorm)
-            "snow" -> context.getString(R.string.snow)
-            "mist" -> context.getString(R.string.mist)
-            "smoke" -> context.getString(R.string.smoke)
-            "haze" -> context.getString(R.string.haze)
-            "dust" -> context.getString(R.string.dust)
-            "fog" -> context.getString(R.string.fog)
-            "sand" -> context.getString(R.string.sand)
-            "ash" -> context.getString(R.string.ash)
-            "squall" -> context.getString(R.string.squall)
-            "tornado" -> context.getString(R.string.tornado)
-            "light rain" -> context.getString(R.string.light_rain)
-            "moderate rain" ->context.getString(R.string.moderate_rain)
-            "heavy intensity rain" -> context.getString(R.string.heavy_intensity_rain)
-            "very heavy rain" -> context.getString(R.string.very_heavy_rain)
-            "broken clouds" -> context.getString(R.string.broken_clouds)
-            "feelsLike" -> context.getString(R.string.feelsLike)
-            "H" -> context.getString(R.string.H)
-            "L" -> context.getString(R.string.L)
-
-
-            else -> description // Return the description as-is if no translation exists
-        }
-    }
-
-
     private fun updateWeatherDetails(currentWeather: WeatherList) {
         val sharedPrefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
          val  WindUnit = sharedPrefs.getString(WIND_UNIT_KEY, getString(R.string.Km)) ?: getString(R.string.Km)
@@ -989,13 +1012,13 @@ fetchWeatherDataForCurrentLocation()
         if (!isArabic) {
 
             binding.windval.text = when (WindUnit) {
-                "MPH" -> "${formatNumberToArabic(currentWeather.wind.speed.toInt()).format(".")} " + getString(R.string.mph)
+                "MPH" -> "${ToastUtil.formatNumberToArabic(currentWeather.wind.speed.toInt()).format(".")} " + getString(R.string.mph)
 
-                else -> "${formatNumberToArabic(currentWeather.wind.speed.toInt()).format(".")} " + getString(R.string.Km)
+                else -> "${ToastUtil.formatNumberToArabic(currentWeather.wind.speed.toInt()).format(".")} " + getString(R.string.Km)
             }
         } else {
             binding.windval.text = when (WindUnit) {
-                "MPH" -> "${convertToMPH(currentWeather.wind.speed).toInt()}" + getString(R.string.mph)
+                "MPH" -> "${ToastUtil.convertToMPH(currentWeather.wind.speed).toInt()}" + getString(R.string.mph)
                 else -> (currentWeather.wind.speed.toInt()).toString() + getString(R.string.Km)
             }
 
@@ -1009,14 +1032,14 @@ fetchWeatherDataForCurrentLocation()
                 if (!isArabic) {
                     binding.windval.text = when (WindUnit) {
 
-                        "MPH" -> convertToMPH(currentWeather.wind.speed).toString().format(".")+ getString(R.string.mph)
+                        "MPH" -> ToastUtil.convertToMPH(currentWeather.wind.speed).toString().format(".")+ getString(R.string.mph)
                         else -> (currentWeather.wind.speed).toString().format(".") + getString(R.string.Km)
 
                     }
                 }else{
                     binding.windval.text = when (WindUnit) {
-                        "MPH" -> "${formatNumberToArabic(convertToMPH(currentWeather.wind.speed).toInt())}" + getString(R.string.mph)
-                        else -> "${formatNumberToArabic((currentWeather.wind.speed).toInt())}" + getString(R.string.Km)
+                        "MPH" -> "${ToastUtil.formatNumberToArabic(ToastUtil.convertToMPH(currentWeather.wind.speed).toInt())}" + getString(R.string.mph)
+                        else -> "${ToastUtil.formatNumberToArabic((currentWeather.wind.speed).toInt())}" + getString(R.string.Km)
                     }
                 }
             }
@@ -1032,11 +1055,11 @@ fetchWeatherDataForCurrentLocation()
                 uvval.text = currentWeather.main.sea_level.toString()
             } else {
                 Log.i("LANGUAGE", "LAnguageISARABICNOW: $isArabic")
-                pressureval.text = formatNumberToArabic(currentWeather.main.pressure)
-                humidityval.text = formatNumberToArabic(currentWeather.main.humidity)
-                visibilityval.text = formatNumberToArabic(currentWeather.visibility)
-                airqualityval.text = formatNumberToArabic(currentWeather.main.temp.toInt())// Placeholder
-                uvval.text = formatNumberToArabic(currentWeather.main.sea_level) // Placeholder// Placeholder
+                pressureval.text = ToastUtil.formatNumberToArabic(currentWeather.main.pressure)
+                humidityval.text = ToastUtil.formatNumberToArabic(currentWeather.main.humidity)
+                visibilityval.text = ToastUtil.formatNumberToArabic(currentWeather.visibility)
+                airqualityval.text = ToastUtil.formatNumberToArabic(currentWeather.main.temp.toInt())// Placeholder
+                uvval.text = ToastUtil.formatNumberToArabic(currentWeather.main.sea_level) // Placeholder// Placeholder
             }
             humiditygraphic.setImageResource(R.drawable.humidity)
             PressureGraphic.setImageResource(R.drawable.pressure)
@@ -1047,26 +1070,6 @@ fetchWeatherDataForCurrentLocation()
         }
 
     }
-
-
-    private  fun formatNumberToArabic(number: Int): String {
-        return number.toString().map { char ->
-            when (char) {
-                '0' -> '٠'
-                '1' -> '١'
-                '2' -> '٢'
-                '3' -> '٣'
-                '4' -> '٤'
-                '5' -> '٥'
-                '6' -> '٦'
-                '7' -> '٧'
-                '8' -> '٨'
-                '9' -> '٩'
-                else -> char // Return the character as is if it's not a digit
-            }
-        }.joinToString("")
-    }
-
 
     private fun getSelectedLocation(): Pair<Double, Double>? {
         val sharedPreferences = getSharedPreferences("locationResult", Context.MODE_PRIVATE)
@@ -1081,13 +1084,11 @@ Log.i("FROMGETSELECTEDLOCATION", "Received latitude: $lat, longitude: $lon")
         }
     }
     override fun onStart() {
-
         super.onStart()
         Log.i("ONSTARTTTTTTTTTTT", "onStart")
         val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
         registerReceiver(networkStateReceiver, intentFilter)
         lifecycleScope.launch(Dispatchers.Main) {
-
                 if (NetworkUtils.isNetworkAvailable(this@MainActivity)) {
                     isConnected = true
                     // Network is available
@@ -1101,24 +1102,23 @@ Log.i("FROMGETSELECTEDLOCATION", "Received latitude: $lat, longitude: $lon")
                     isConnected = false
                     handleNetworkChange(isConnected)
                         // Show no internet layout and display the snackbar
-                        showNoInternetLayout(true) // Show the no internet layout
-                        showSnackbar(getString(R.string.Please_check_your_internet_connection_and_try_again))
+                    lifecycleScope.launch {
+                        binding.lottieAnimationView.visibility = View.VISIBLE
+                        delay(5000)
+                        showNoInternetLayout(false) // Show the no internet layout
+                        binding.lottieAnimationView.visibility = View.GONE
+
+
                     }
+                }
                 }
             }
 
-    override fun onResume() {
-        super.onResume()
-        val sharedPreferencesCity = this.getSharedPreferences("myPrefs", Context.MODE_PRIVATE)
-        val cityNameFromSharedPrefs = sharedPreferencesCity.getString("fullLocation", null)
-        if (cityNameFromSharedPrefs != null) {
-            val updatedCityName = sharedPreferencesCity.getString("fullLocation", null)
-            cityNameFromFragment = updatedCityName
-            Log.i("FROMONRESUME", "cityNameFromFragment: $cityNameFromFragment")
-        } else {
-            cityNameFromFragment = null
-            Log.i("FROMONRESUME", "cityNameFromFragment: $cityNameFromFragment is null already ")
-        }
+
+    override fun onStop() {
+        super.onStop()
+        weatherVM.loadCachedWeather()
+        Log.i("ONRESUME", "onResume")
     }
 
     private fun showConnectToInternetDialog():AlertDialog{
@@ -1140,7 +1140,15 @@ Log.i("FROMGETSELECTEDLOCATION", "Received latitude: $lat, longitude: $lon")
 
         // Just navigate button
         builder.setNegativeButton("Cancel") { dialog, id ->
-            // Handle the just navigate action
+            lifecycleScope.launch {
+                binding.CahcedText.visibility=View.VISIBLE
+                delay(2000)
+                binding.CahcedText.visibility=View.GONE
+                delay(1000)
+
+showSnackbar(getString(R.string.cachedSnackBar))
+            }
+            offlineContent()
         }
         // Cancel button
 
@@ -1157,29 +1165,22 @@ Log.i("FROMGETSELECTEDLOCATION", "Received latitude: $lat, longitude: $lon")
             binding.main.visibility = View.GONE
             binding.noInternetConstraint.visibility = View.VISIBLE
             binding.lottieAnimationView.visibility = View.VISIBLE
-
         } else {
             binding.main.visibility = View.VISIBLE
             binding.noInternetConstraint.visibility = View.GONE
-            this.recreate()
 
         }
-    }
-    override fun onStop() {
-        super.onStop()
-        unregisterReceiver(networkStateReceiver)
     }
 
     private fun checkedPermissions(): Boolean {
         val isCoarseLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         val isFineLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val notificationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         Log.d("Permissions", "Coarse location permission granted: $isCoarseLocationPermissionGranted")
         Log.d("Permissions", "Fine location permission granted: $isFineLocationPermissionGranted")
         // Check if location services are enabled
         val isLocationEnabled = promptEnableLocationServices()
 
-        return (isFineLocationPermissionGranted || isCoarseLocationPermissionGranted) && notificationPermissionGranted && isLocationEnabled
+        return (isFineLocationPermissionGranted || isCoarseLocationPermissionGranted) && isLocationEnabled
     }
 
     private fun promptEnableLocationServices(): Boolean {

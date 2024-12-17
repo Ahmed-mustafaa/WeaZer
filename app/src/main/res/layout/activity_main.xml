@@ -17,8 +17,6 @@
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-
         <LinearLayout
             android:id="@+id/Linear"
             android:layout_width="wrap_content"
@@ -26,7 +24,6 @@
             android:background="@color/white"
             android:orientation="vertical"
             android:visibility="visible">
-
             <com.google.android.material.circularreveal.cardview.CircularRevealCardView
                 android:id="@+id/upper_bar"
                 android:layout_width="match_parent"
@@ -103,7 +100,9 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.492"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"></ImageView>
+                    app:layout_constraintTop_toTopOf="parent">
+
+                </ImageView>
 
                 <TextView
                     android:id="@+id/noInternetText"
@@ -179,6 +178,7 @@
                             android:layout_marginStart="0dp"
                             android:layout_marginTop="230dp"
                             android:accessibilityLiveRegion="assertive"
+
                             android:clipChildren="false"
                             android:clipToPadding="false"
                             app:spanCount="1"
@@ -232,6 +232,7 @@
                             android:layout_height="74dp"
                             android:layout_marginStart="120dp"
                             android:layout_marginTop="80dp"
+                            android:contentDescription="TODO"
                             app:srcCompat="@drawable/cloudy" />
 
 
@@ -250,8 +251,8 @@
                             android:id="@+id/temp_max"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="30dp"
-                            android:layout_marginTop="195dp"
+                            android:layout_marginStart="200dp"
+                            android:layout_marginTop="220dp"
                             android:fontFamily="@font/alata"
                             android:text="@string/H"
                             android:textColor="#000"
@@ -284,7 +285,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="30dp"
-                            android:layout_marginTop="170dp"
+                            android:layout_marginTop="160dp"
                             android:fontFamily="@font/alata"
                             android:text="                                     "
                             android:textColor="#000"
@@ -541,7 +542,9 @@
                             android:layout_marginTop="20dp"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@+id/materialCardView2"></androidx.recyclerview.widget.RecyclerView>
+                            app:layout_constraintTop_toBottomOf="@+id/materialCardView2">
+
+                        </androidx.recyclerview.widget.RecyclerView>
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -568,13 +571,15 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         app:defaultNavHost="true"
-        app:navGraph="@navigation/navigation"></androidx.fragment.app.FragmentContainerView>
+        app:navGraph="@navigation/navigation" />
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigation_view"
         android:layout_width="117dp"
         android:layout_height="765dp"
         android:layout_gravity="start"
+        android:background="#E9FFF7F7"
+        app:headerLayout="@layout/nav_header"
         app:menu="@menu/menu_item" />
 </androidx.drawerlayout.widget.DrawerLayout>
 

@@ -18,7 +18,6 @@ class WeatherVM(private val repository: WeatherRepository,
     private val _forecast = MutableLiveData<ForCast?>()
     val forecast: MutableLiveData<ForCast?> = _forecast
     private val _translatedCity = MutableLiveData<String>()
-    val translatedCity: LiveData<String> get() = _translatedCity
     private fun handleApiError(code: Int) {
         when (code) {
             400 -> {
@@ -38,20 +37,6 @@ class WeatherVM(private val repository: WeatherRepository,
                 }
     }
         }
-    fun translateCityName(cityName: String) {
-        viewModelScope.launch {
-            try {
-                // Call the function that translates the city name
-                val translatedName = repository.translateCityName(cityName)
-                Log.i("From weatherVm", "lat: $translatedName")
-                _translatedCity.postValue(translatedName) // Update LiveData
-            } catch (e: Exception) {
-                Log.e("weatherVm", "Error TRANSLATING CITY NAME : ${e.message}")
-                e.printStackTrace()
-                _translatedCity.postValue("Translation failed")
-            }
-        }
-    }
     fun updateWeatherFromMap(lat: Double, lon: Double, unit: String = "metric") {
         viewModelScope.launch(Dispatchers.IO) {
             try{

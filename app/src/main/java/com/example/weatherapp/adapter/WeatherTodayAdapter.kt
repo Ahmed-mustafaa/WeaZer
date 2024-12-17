@@ -99,7 +99,7 @@ class WeatherTodayAdapter(private val hourlyForecast: List<WeatherList>, var sel
             "01d" -> holder.imageDisplay.setImageResource(R.drawable.sun)
             "01n" -> holder.imageDisplay.setImageResource(R.drawable.moon)
             "02d" -> holder.imageDisplay.setImageResource(R.drawable.clouds)
-            "02n" -> holder.imageDisplay.setImageResource(R.drawable.towon)
+            "02n" -> holder.imageDisplay.setImageResource(R.drawable.cloud)
             "03d", "03n" -> holder.imageDisplay.setImageResource(R.drawable.plaincouds)
             "04d", "04n" -> holder.imageDisplay.setImageResource(R.drawable.four)
             "09d", "09n" -> holder.imageDisplay.setImageResource(R.drawable.rainy)

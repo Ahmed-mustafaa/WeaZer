@@ -107,4 +107,6 @@ dependencies {
     implementation ("org.osmdroid:osmdroid-android:6.1.10" )// Check for the latest version
     implementation ("com.airbnb.android:lottie:5.0.3")
 
+    implementation ("androidx.work:work-runtime-ktx:2.8.0")
+
 }

@@ -7,8 +7,8 @@
     <!-- res/layout/dialog_custom.xml -->
     <androidx.cardview.widget.CardView
         style="@style/ThemeOverlay.MaterialComponents.Toolbar.Primary"
-        android:layout_width="match_parent"
-        android:layout_height="112dp"
+        android:layout_width="0dp"
+        android:layout_height="101dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -16,8 +16,9 @@
 
         <TextView
             android:id="@+id/dialog_title"
-            android:layout_width="413dp"
-            android:layout_height="52dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
             android:layout_marginStart="10dp"
             android:text="@string/DialogConfirmation"
             android:textSize="15sp"
@@ -25,24 +26,31 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/dialog_button"
+        <LinearLayout
+            android:id="@+id/top"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="50dp"
-            android:backgroundTint="#860F0F"
-            android:text="Yes"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_gravity="center|top"
+            android:layout_marginTop="50dp">
 
-        <Button
-            android:id="@+id/CancelButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="150dp"
-            android:layout_marginTop="50dp"
-            android:text="Cancel" />
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginEnd="0dp"
+                android:backgroundTint="#860F0F"
+                android:text="@string/Cancel" />
+
+            <Button
+                android:id="@+id/yesButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginStart="100dp"
+                android:text="@string/Yes" />
+
+        </LinearLayout>
 
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

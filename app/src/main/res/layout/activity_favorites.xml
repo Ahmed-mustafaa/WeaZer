@@ -17,6 +17,20 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottieAnimationView"
+        android:layout_width="230dp"
+        android:layout_height="239dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="100dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:lottie_autoPlay="true"
+        app:lottie_fileName="infinity-loop.json"
+        app:lottie_loop="true"
+        app:lottie_repeatMode="reverse" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/favoritesRV"
         android:layout_width="match_parent"
@@ -54,6 +68,7 @@
         android:text="@string/NoFavorites"
         android:textColor="#ECF1F3"
         android:textSize="40sp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

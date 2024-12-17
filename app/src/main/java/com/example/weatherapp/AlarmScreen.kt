@@ -2,7 +2,8 @@ package com.example.weatherapp
 
 import android.annotation.SuppressLint
 import android.app.AlarmManager
-
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -18,31 +19,28 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherapp.adapter.AlarmAdapter
 import com.example.weatherapp.databinding.AlarmScreenBinding
 import com.example.weatherapp.databinding.CustomdialogBinding
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 class AlarmScreen : Fragment() {
     private lateinit var alarmAdapter: AlarmAdapter
     private val alarmList = mutableSetOf<Alarm>()
     private lateinit var binding: AlarmScreenBinding
-    private var isToggled = false
 
     companion object {
         private const val REQUEST_CODE_POST_NOTIFICATIONS = 1001
@@ -65,7 +63,6 @@ class AlarmScreen : Fragment() {
         loadAlarmsFromSharedPreferences() // Load alarms
         setupRecyclerView()
 
-
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
@@ -84,17 +81,20 @@ class AlarmScreen : Fragment() {
             alarmAdapter = AlarmAdapter(alarmList) { alarm, isChecked ->
                 if (isChecked) {
                     // Set the alarm
-                    scheduleAlarm(alarm.timeInMillis)
-                } else {
-                    Log.d("AlarmScreen", "Alarm canceled: ${alarm.formattedTime}")
                     cancelAlarm(alarm.timeInMillis)
+                    adapter = alarmAdapter
+
+                } else {
+                    Log.d("AlarmScreen", "Alarm schedueled: ${alarm.formattedTime}")
+                    scheduleAlarm(alarm.timeInMillis)
+                    adapter = alarmAdapter
+
                 }
             }
             adapter = alarmAdapter
         }
 
         binding.fab.setOnClickListener {
-            ToastUtil.showCustomToast(requireContext(), "Floating Action Button clicked")
             showTimePicker()
         }
     }
@@ -137,17 +137,6 @@ class AlarmScreen : Fragment() {
         }
     }
 
-    @SuppressLint("CommitPrefEdits")
-    private fun removeAlarm() {
-        val sharedPreferences =
-            requireContext().getSharedPreferences("alarms_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        val gson = com.google.gson.Gson()
-        val json = gson.toJson(alarmList)
-        alarmList.clear()
-        alarmAdapter.notifyDataSetChanged()
-        saveAlarmsToSharedPreferences()
-    }
 
     @RequiresApi(Build.VERSION_CODES.S)
     private fun loadAlarmsFromSharedPreferences() {
@@ -159,14 +148,12 @@ class AlarmScreen : Fragment() {
             val type = object : com.google.gson.reflect.TypeToken<MutableList<Alarm>>() {}.type
             val loadedAlarms: MutableList<Alarm> = gson.fromJson(json, type)
             alarmList.clear()
-
             alarmList.addAll(loadedAlarms)
             alarmAdapter = AlarmAdapter(alarmList) { alarm, isEnabled ->
                 if (isEnabled) {
-                    isToggled = true
                     scheduleAlarm(alarm.timeInMillis)
                 } else {
-Log.d("AlarmScreen", "Alarm canceled: ${alarm.formattedTime}")
+                    Log.d("AlarmScreen", "Alarm canceled: ${alarm.formattedTime}")
                     cancelAlarm(alarm.timeInMillis,)
                 }
             }
@@ -180,6 +167,7 @@ Log.d("AlarmScreen", "Alarm canceled: ${alarm.formattedTime}")
         }
     }
 
+
     @SuppressLint("BatteryLife")
     private fun promptIgnoreBatteryOptimizations() {
         val powerManager = requireContext().getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -192,49 +180,55 @@ Log.d("AlarmScreen", "Alarm canceled: ${alarm.formattedTime}")
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
+    @SuppressLint("NewApi")
     private fun showTimePicker() {
-        val picker = MaterialTimePicker.Builder()
-        // Set an initial minute (e.g., 0)
-            .setTitleText("Select Alarm Time") // Optional: Set the title for the picker
-            .build()
-    picker.addOnPositiveButtonClickListener {
+                val picker = MaterialTimePicker.Builder()
+                    .setTitleText("Select Alarm Time")
+                    .build()
 
-        // Get selected hour and minute from the picker
-        val selectedHour = picker.hour
-        val selectedMinute = picker.minute
-        // Get alarm time in milliseconds (assuming you have a method to calculate this)
-        val alarmTimeInMillis = getAlarmTimeInMillis(selectedHour, selectedMinute)
+                picker.addOnPositiveButtonClickListener {
+                    val selectedHour = picker.hour
+                    val selectedMinute = picker.minute
 
-        // Format the time (assuming you have a method to format the time)
-        val formattedTime = formatTime(alarmTimeInMillis)
-        alarmList.add(Alarm(alarmTimeInMillis, formattedTime))
-        alarmAdapter.notifyItemInserted(alarmList.size - 1)
-        binding.noAlarmTextView.visibility = View.GONE
-        saveAlarmsToSharedPreferences()
-        scheduleAlarm(alarmTimeInMillis)
-        ToastUtil.showCustomToast(requireContext(), "Alarm set for $formattedTime")
-        // Handle the selected time (e.g., update UI or store the alarm time)
-        Log.d("MaterialTimePicker", "Selected Time: $formattedTime")
+                    // Calculate alarm time in milliseconds
+                    val alarmTimeInMillis = getAlarmTimeInMillis(selectedHour, selectedMinute)
 
-}
+                    // Format the time for display
+                    val formattedTime = formatTime(alarmTimeInMillis)
 
-        picker.addOnNegativeButtonClickListener {
-            // Handle the negative button click (e.g., show a message if no alarms are set)
-            if (alarmList.isEmpty()) {
-                binding.noAlarmTextView.visibility = View.VISIBLE
+                    if (alarmList.any { it.timeInMillis == alarmTimeInMillis }) {
+                        ToastUtil.showCustomToast(
+                            requireContext(),
+                            "Alarm already exists for this time"
+                        )
+                    } else {
+                        // Add the new alarm
+                        alarmList.add(Alarm(alarmTimeInMillis, formattedTime, true))
+                        alarmAdapter.notifyItemInserted(alarmList.size - 1)
+                        binding.noAlarmTextView.visibility = View.GONE
+
+                        // Save alarms and schedule the new one
+                        saveAlarmsToSharedPreferences()
+                        scheduleAlarm(alarmTimeInMillis)
+
+                        ToastUtil.showCustomToast(requireContext(), "Alarm set for $formattedTime")
+                        Log.d("MaterialTimePicker", "Selected Time: $formattedTime")
+                    }
+                }
+
+                picker.addOnNegativeButtonClickListener {
+                    if (alarmList.isEmpty()) {
+                        binding.noAlarmTextView.visibility = View.VISIBLE
+                    }
+                }
+
+                picker.show(childFragmentManager, "MaterialTimePicker")
             }
-        }
-        picker.show(childFragmentManager, "MaterialTimePicker")
-
-    }
-
-
-
 
 
 
     private fun formatTime(timeInMillis: Long): String {
-        val sdf = SimpleDateFormat("EEE dd-MM-yyyy-HH:mm a", Locale.getDefault())
+        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm a", Locale.getDefault())
         return sdf.format(timeInMillis)
     }
     @RequiresApi(Build.VERSION_CODES.S)
@@ -321,18 +315,16 @@ Log.d("AlarmScreen", "Alarm canceled: ${alarm.formattedTime}")
             .setCancelable(true) // Allow dismissing the dialog by touching outside
             .create()
         dialogView.dialogTitle.text = getString(R.string.alarmDialogConfirmation)
-        dialogView.dialogButton.setOnClickListener{
+        dialogView.yesButton.setOnClickListener{
             val newalarmList = alarmList.toMutableList()
             newalarmList.removeAt(position)
             alarmAdapter.notifyItemRemoved(position)
             alarmList.clear()
             alarmList.addAll(newalarmList)
             saveAlarmsToSharedPreferences()
-
             dialog.dismiss()
         }
-        dialogView.CancelButton.setOnClickListener{
-            // Reset swipe state
+        dialogView.cancelButton.setOnClickListener{
             alarmAdapter.notifyItemChanged(position)
             dialog.dismiss()
         }
@@ -363,9 +355,11 @@ Log.d("AlarmScreen", "Alarm canceled: ${alarm.formattedTime}")
         }
         promptIgnoreBatteryOptimizations()
         val alarmManager = requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(requireContext(), AlarmReceiver::class.java)
-        intent.putExtra("NOTIFICATION_TYPE", "MANUAL") // Mark this as a manual alarm
-        intent.putExtra("ALARM_TIME", timeInMillis)
+        val intent = Intent(requireContext(), AlarmReceiver::class.java).apply {
+            putExtra("NOTIFICATION_TYPE", "MANUAL")
+            putExtra("ALARM_TIME", timeInMillis)
+        }
+
         val uniqueRequestCode = System.currentTimeMillis().toInt()
         val alarmIntent = PendingIntent.getBroadcast(
             requireContext(),
@@ -380,11 +374,69 @@ ToastUtil.showCustomToast(requireContext(), "Alarm scheduled for $timeInMillis!"
     val nextDayTimeInMillis = timeInMillis + 24 * 60 * 60 * 1000 // Add 24 hours in milliseconds
 
     alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextDayTimeInMillis+24*60*60, alarmIntent)
-ToastUtil.showCustomToast(requireContext(), "Alarm scheduled for tomorrow at $timeInMillis!")
+    ToastUtil.showCustomToast(requireContext(), "Alarm scheduled for tomorrow at $timeInMillis!")
 }
-            ToastUtil.showCustomToast(requireContext(), "Alarm scheduled!")
 
 
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun scheduleNotification(timeInMillis: Long) {
+        if (!canScheduleExactAlarms()) {
+            ToastUtil.showCustomToast(
+                requireContext(),
+                "This app needs permission to schedule alarms. Please enable it in settings."
+            )
+            openAppSettings()
+            return
+        }
+        promptIgnoreBatteryOptimizations()
+
+        val currentTime = System.currentTimeMillis()
+
+        // Set the time to trigger the notification
+        val triggerTime = if (timeInMillis >= currentTime) {
+            timeInMillis
+        } else {
+            // If the time has passed, schedule it for the next day
+            timeInMillis + 24 * 60 * 60 * 1000 // Add 24 hours in milliseconds
+        }
+
+        val notificationManager =
+            requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Ensure Notification Channel is created for Android 8.0+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "ALARM_NOTIFICATION_CHANNEL",
+                "Alarm Notifications",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Channel for Alarm Notifications"
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Create a PendingIntent to display the notification
+        val notificationIntent = Intent(requireContext(), AlarmReceiver::class.java).apply {
+            putExtra("NOTIFICATION_TYPE", "MANUAL") // Optional metadata
+            putExtra("ALARM_TIME", triggerTime)
+        }
+        val uniqueRequestCode = System.currentTimeMillis().toInt()
+        val pendingIntent = PendingIntent.getBroadcast(
+            requireContext(),
+            uniqueRequestCode,
+            notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Schedule the notification using AlarmManager
+        val alarmManager = requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+
+        // Notify the user that the notification is scheduled
+        val formattedTime = SimpleDateFormat("dd/MM/yyyy HH:mm a", Locale.getDefault()).format(Date(triggerTime))
+        ToastUtil.showCustomToast(requireContext(), "Notification scheduled for $formattedTime!")
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -422,8 +474,8 @@ ToastUtil.showCustomToast(requireContext(), "Alarm scheduled for tomorrow at $ti
             )
         }
     }
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
 
         // Save the alarms' state before the app is stopped or navigated away
         saveAlarmsToSharedPreferences()
@@ -431,5 +483,5 @@ ToastUtil.showCustomToast(requireContext(), "Alarm scheduled for tomorrow at $ti
         // Optionally, you can cancel any ongoing alarms if necessary
     }
 
-    data class Alarm(val timeInMillis: Long, val formattedTime: String, var isActive: Boolean = false)
+    data class Alarm(val timeInMillis: Long,val formattedTime: String, var isActive: Boolean)
 }

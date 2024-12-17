@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <array name="preloaded_fonts" translatable="false">
+        <item>@font/</item>
+        <item>@font/aclonica</item>
         <item>@font/alata</item>
+        <item>@font/arapey</item>
         <item>@font/audiowide</item>
         <item>@font/biryani_semibold</item>
     </array>

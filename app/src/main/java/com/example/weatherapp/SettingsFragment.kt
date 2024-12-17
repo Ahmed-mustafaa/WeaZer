@@ -169,9 +169,6 @@ class SettingsFragment: Fragment() {
         binding.Save.setOnClickListener {
             val Intent = Intent(requireContext(), MainActivity::class.java)
                startActivity(Intent)
-            requireActivity().recreate()
-
-
         }
     }
 

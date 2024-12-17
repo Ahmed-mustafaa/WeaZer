@@ -19,6 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.view.marginStart
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -38,6 +39,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 class FavoritesFragment : Fragment() {
@@ -70,57 +72,67 @@ class FavoritesFragment : Fragment() {
     ): View {
 
         binding = ActivityFavoritesBinding.inflate(inflater, container, false)
+        loadFavoriteCities()
+        val repository = WeatherRepository(RetrofitClient.apiService, requireActivity())
+        val viewModelFactory = ViewModelFactory(repository, sharedPrefs)
+        weatherVM =
+            ViewModelProvider(requireActivity(), viewModelFactory)[WeatherVM::class.java]
+
+        arguments?.let { bundle ->
+            val cityName = bundle.getString("cityName", "Unknown City")
+            val latitude = bundle.getDouble("latitude", 0.0)
+            val longitude = bundle.getDouble("longitude", 0.0)
+            val Temp = bundle.getDouble("Temp", 0000.0000)
+            val Time = bundle.getString("Time", "00.00")
+            val forecast = bundle.getParcelable<ForCast>("forecast")
+            Log.d("FavoritesFragment", "Tempreature : $Temp")
+            Log.d("FavoritesFragment", "CityName: $cityName")
+            Log.d("FavoritesFragment", "fullLocation: $cityName")
+            Log.d("FavoritesFragment", "Time is : $Time")
+
+            // Now, handle the retrieved data as needed
+            if (forecast != null) {
+                Log.i("FromFavoritesFragment", " Data Fetched")
+                lifecycleScope.launch {
+                    // Step 1: Update location in IO thread
+                    val updateJob = launch(Dispatchers.Main) {
+                        updateFavoritesWithCity(forecast)
+                    }
+
+                    updateJob.join() // Wait for the update to finish
+                    // Step 2: Show RecyclerView on Main thread
+                    withContext(Dispatchers.Main) {
+                        binding.fragmentContainerView.visibility = View.GONE
+                        binding.lottieAnimationView.visibility = View.GONE
+                        binding.noFav.visibility = View.GONE
+                    }
+                }
+            }
+        }
+
         return binding.root
+
     }
 
-    @SuppressLint("SuspiciousIndentation", "CommitPrefEdits")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-            loadFavoriteCities()
-
-            val repository = WeatherRepository(RetrofitClient.apiService, requireActivity())
-            val viewModelFactory = ViewModelFactory(repository, sharedPrefs)
-            weatherVM = ViewModelProvider(requireActivity(), viewModelFactory)[WeatherVM::class.java]
-
-        arguments?.let {bundle ->
-                    val cityName = bundle.getString("cityName", "Unknown City")
-                    val latitude = bundle.getDouble("latitude", 0.0)
-                    val longitude = bundle.getDouble("longitude", 0.0)
-                    val Temp = bundle.getDouble("Temp", 0000.0000)
-                    val Time = bundle.getString("Time", "00.00")
-                    val forecast = bundle.getParcelable<ForCast>("forecast")
-                    Log.d("FavoritesFragment", "Tempreature : $Temp")
-                    Log.d("FavoritesFragment", "CityName: $cityName")
-                    Log.d("FavoritesFragment", "fullLocation: $cityName")
-                    Log.d("FavoritesFragment", "Time is : $Time")
-
-                    // Now, handle the retrieved data as needed
-                    if (forecast != null) {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            Log.i("FromFavoritesFragment", " Data Fetched")
-
-                            updateFavoritesWithCity(forecast)
-                            binding.fragmentContainerView.visibility=View.GONE
-                      }
-                     }
-                    else
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            Log.i("FromFavoritesFragment", "NO Data Fetched")
-                            binding.noFav.visibility = View.VISIBLE
-                        }
-
-                }
-
-                // Floating Action Button for navigating to MapsFragment
-            binding.fab.setOnClickListener {
-                if (NetworkUtils.isNetworkAvailable(requireActivity())) {
-                    findNavController().navigate(R.id.mapsFragment)
-                } else {
-                    showNoInternetSnackbar("You're out of internet connection cannot navigate to maps ")
-                }
 
 
+            @SuppressLint("SuspiciousIndentation", "CommitPrefEdits")
+            override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+                super.onViewCreated(view, savedInstanceState)
+                binding.lottieAnimationView.visibility = View.GONE
+
+
+
+        // Floating Action Button for navigating to MapsFragment
+        binding.fab.setOnClickListener {
+            if (NetworkUtils.isNetworkAvailable(requireActivity())) {
+                findNavController().navigate(R.id.mapsFragment)
+            } else {
+                showNoInternetSnackbar("You're out of internet connection cannot navigate to maps ")
             }
+
+
+        }
 
     }
 
@@ -186,7 +198,6 @@ class FavoritesFragment : Fragment() {
         } else {
             binding.noFav.visibility = View.GONE
             binding.favoritesRV.visibility = View.VISIBLE
-            favoritesAdapter.notifyDataSetChanged()
         }
     }
     private fun showNoInternetSnackbar(message: String) {
@@ -195,7 +206,8 @@ class FavoritesFragment : Fragment() {
 
     // Load favorite cities from Shared Preferences
     private fun loadFavoriteCities() {
-        val sharedPreferences = requireContext().getSharedPreferences("myprefs", Context.MODE_PRIVATE)
+        val sharedPreferences =
+            requireContext().getSharedPreferences("myprefs", Context.MODE_PRIVATE)
 
         val favoriteCitiesJson = sharedPreferences.getString("favoriteWeatherList", null)
         Log.i("FavoritesFragment", "Loaded favorites: $favoriteCitiesJson")
@@ -203,7 +215,8 @@ class FavoritesFragment : Fragment() {
 
         if (!favoriteCitiesJson.isNullOrEmpty()) {
             try {
-                val loadedCities = Gson().fromJson(favoriteCitiesJson, Array<ForCast>::class.java).toSet()
+                val loadedCities =
+                    Gson().fromJson(favoriteCitiesJson, Array<ForCast>::class.java).toSet()
                 favoriteWeatherList.clear()
                 favoriteWeatherList.addAll(loadedCities)
                 setupRecyclerView()
@@ -212,15 +225,13 @@ class FavoritesFragment : Fragment() {
                 Log.e("SharedPreferences", "Error loading favorite cities: ${e.message}")
             }
         } else {
-            binding.noFav.visibility = View.VISIBLE
-            binding.favoritesRV.visibility = View.GONE
+            updateRecyclerViewVisibility()
         }
     }
 
 
-
     private fun GoToMainWithUpdatedLocation(favoriteLocation: ForCast) {
-       val Intent = Intent(requireContext(), MainActivity::class.java)
+        val Intent = Intent(requireContext(), MainActivity::class.java)
         Intent.putExtra("latitude", favoriteLocation.city.coord.lat)
         Intent.putExtra("longitude", favoriteLocation.city.coord.lon)
         Intent.putExtra(TIMME_PREFS,favoriteLocation.weatherList[0].dt_txt?.substring(11,16))
@@ -266,13 +277,19 @@ class FavoritesFragment : Fragment() {
     }
 
     private fun updateFavoritesWithCity(forcast: ForCast) {
+        lifecycleScope.launch(Dispatchers.Main) {
             favoriteWeatherList.add(forcast)
             setupRecyclerView()
-        favoritesAdapter.notifyItemInserted(favoriteWeatherList.size - 1)
+            favoritesAdapter.notifyItemInserted(favoriteWeatherList.size - 1)
             saveFavorites()
+
+            // Ensure RecyclerView visibility is updated
+            updateRecyclerViewVisibility()
+
             Log.i("cities :", "updateFavoritesWithCity: $favoriteWeatherList")
             showToast("${forcast.city.name} added to favorites!")
-  }
+        }
+    }
 
     // Save favorite cities to SharedPreferences
     private fun saveFavorites() {
@@ -299,17 +316,17 @@ class FavoritesFragment : Fragment() {
             .setView(dialogView.root)
             .setCancelable(true) // Allow dismissing the dialog by touching outside
             .create()
-        dialogView.dialogButton.setOnClickListener{
+        dialogView.yesButton.setOnClickListener{
             val favoriteLocation = favoriteWeatherList[position]
             removeCityFromFavorites(favoriteLocation)
             favoritesAdapter.notifyItemRemoved(position)
             dialog.dismiss()
         }
-        dialogView.CancelButton.setOnClickListener{
-                // Reset swipe state
-                favoritesAdapter.notifyItemChanged(position)
-                dialog.dismiss()
-            }
+        dialogView.cancelButton.setOnClickListener{
+            // Reset swipe state
+            favoritesAdapter.notifyItemChanged(position)
+            dialog.dismiss()
+        }
         dialog.show()
     }
 }

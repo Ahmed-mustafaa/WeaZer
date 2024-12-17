@@ -20,11 +20,9 @@ import kotlinx.coroutines.withContext
 
 class WeatherRepository(private val api: Service, context: Context) {
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var fusedLocationProviderClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
 
-    private val cachedWeatherData = MutableLiveData<ForCast?>()
 
     /**
      * Fetches the current weather using location or fallback default coordinates.
@@ -50,39 +48,6 @@ class WeatherRepository(private val api: Service, context: Context) {
         }
 
 
-
-    /**
-     * Fetches weather by latitude and longitude, utilizing cache to minimize redundant calls.
-     */
-    suspend fun getWeatherWithCache(lat: Double, lon: Double, unit: String): ForCast {
-        val cache = cachedWeatherData.value
-        if (cache != null) {
-            Log.d("WeatherRepository", "Using cached weather data")
-            return cache
-        }
-
-        Log.d("WeatherRepository", "Fetching weather for coordinates: $lat, $lon")
-        val fetchedData = api.getWeatherByCoordinates(lat, lon, unit, Utils.API_KEY)
-        cachedWeatherData.postValue(fetchedData)
-        return fetchedData
-    }
-
-    /**
-     * Fetches weather by city name with proper error handling.
-     */
-    suspend fun getWeatherByCityName(cityName: String, unit: String): ForCast {
-        return try {
-            Log.d("WeatherRepository", "Fetching weather for city: $cityName")
-            api.getWeatherByCityName(cityName, unit, Utils.API_KEY)
-        } catch (e: Exception) {
-            Log.e("WeatherRepository", "Error fetching weather by city name: ${e.message}")
-            throw e
-        }
-    }
-
-    /**
-     * Retrieves the latest device location. Fallback to default if not available.
-     */
     @SuppressLint("MissingPermission")
     private suspend fun getFreshLocation(): Location? {
         return withContext(Dispatchers.IO) {
@@ -166,7 +131,5 @@ class WeatherRepository(private val api: Service, context: Context) {
     /**
      * Stops location updates to prevent memory leaks.
      */
-    fun stopLocationUpdates(locationCallback: LocationCallback) {
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback)
-    }
+
 }

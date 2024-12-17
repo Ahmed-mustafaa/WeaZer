@@ -28,33 +28,23 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import android.location.Geocoder
 import android.util.Log
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SearchView
 import androidx.core.app.NavUtils.navigateUpTo
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.weatherapp.adapter.ItmOnCLickListener
 import com.example.weatherapp.adapter.SuggestionAdapter
-import com.example.weatherapp.model.FavoriteLocation
-import com.example.weatherapp.model.ForCast
-import kotlinx.coroutines.CoroutineScope
+
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.runBlocking
+
 import kotlinx.coroutines.withContext
 import org.osmdroid.events.MapEventsReceiver
 import java.io.IOException
@@ -73,7 +63,6 @@ class MapsFragment : Fragment() {
     private val suggestionList = mutableListOf<String>()
     private lateinit var suggestionAdapter: SuggestionAdapter
     private lateinit var sharedPreferences:SharedPrefs
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sharedPreferences = SharedPrefs(requireContext())
@@ -87,11 +76,14 @@ class MapsFragment : Fragment() {
             this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    val navOptions = NavOptions.Builder()
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .remove(this@MapsFragment)
+                        .commit()
+                    findNavController().navigateUp()
+                   /* val navOptions = NavOptions.Builder()
                         .setPopUpTo(R.id.Home, true)
                         .build()
-
-                    findNavController().navigate(R.id.Home, null, navOptions)
+                    findNavController().navigate(R.id.Home,navOptions)*/
                 }
             })
     }
@@ -103,6 +95,8 @@ class MapsFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         binding = FragmentMapsBinding.inflate(inflater, container, false)
+        initializeMap()
+
         return binding.root
     }
     fun onBackPressedFromView(view: View) {
@@ -116,11 +110,7 @@ class MapsFragment : Fragment() {
         mapView = binding.map
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.setMultiTouchControls(true)
-
         mapView.controller.setZoom(5.0)
-        /*
-                mapView.controller.setCenter(GeoPoint(51.505, -0.09))
-        */
         mapView.invalidate()
         val overlay = object : Overlay() {
             override fun draw(canvas: Canvas?, mapView: MapView?, shadow: Boolean) {
@@ -131,13 +121,18 @@ class MapsFragment : Fragment() {
                 val cities = listOf(
                     "London" to GeoPoint(51.5074, -0.1278),
                     "Paris" to GeoPoint(48.8566, 2.3522),
-                    "Berlin" to GeoPoint(52.52, 13.4050)
+                    "Berlin" to GeoPoint(52.52, 13.4050),
+                    "New York" to GeoPoint(40.7128, -74.0060),
+                    "Tokyo" to GeoPoint(35.6895, 139.6917),
+                    "Sydney" to GeoPoint(-33.8651, 151.2099),
+                    "Rome" to GeoPoint(41.9028, 12.4964),
+
                     // Add other cities as needed
                 )
 
                 val paint = Paint().apply {
                     color = Color.BLACK
-                    textSize = 20f // Set the desired font size
+                    textSize = 30f // Set the desired font size
                     isAntiAlias = true
                 }
 
@@ -149,7 +144,6 @@ class MapsFragment : Fragment() {
             }
         }
         mapView.overlays.add(overlay)
-        mapView.invalidate()
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
@@ -185,14 +179,13 @@ class MapsFragment : Fragment() {
     }
 
     private fun updateLocation(newLocation: GeoPoint) {
-        lifecycleScope.launch {
             // Do something with cityName if needed
             weatherVM.forecast.observe(viewLifecycleOwner) { forecast ->
                 // Display forecast or handle it in the UI
-                Toast.makeText(requireContext(), "Forecast: $forecast", Toast.LENGTH_SHORT).show()
+             Log.i("From MapsFragment", "Forecast: $forecast")
                 val cityName = forecast?.city?.name
                 val Temp = forecast!!.weatherList[0].main.temp
-                val Time =forecast.weatherList[0].dt_txt!!.subSequence(11, 16).toString()
+                val Time = forecast.weatherList[0].dt_txt!!.subSequence(11, 16).toString()
                 Log.i("From MapsFragment", "City Name: $cityName")
                 Log.i("From MapsFragment", "time: $Time")
                 val result = Bundle().apply {
@@ -200,19 +193,13 @@ class MapsFragment : Fragment() {
                     putDouble("latitude", newLocation.latitude)
                     putDouble("longitude", newLocation.longitude)
                     putDouble("Temp", Temp)
-                    putString("Time",Time)
+                    putString("Time", Time)
                     putParcelable("forecast", forecast)
                 }
+                findNavController().navigate(R.id.favorites, result)
 
-                findNavController().navigateUp().also {
-                    findNavController().navigate(R.id.action_mapsFragment_to_favoritesFragment, result)
-                }
             }
-
-
-        }
     }
-
 
 
     private fun updateForFavoritesLocation(newLocation: GeoPoint) {
@@ -235,17 +222,12 @@ class MapsFragment : Fragment() {
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     onBackPressed()
-                    findNavController().navigate(R.id.Home)
                 }
             })
-        binding.backIcon.setOnClickListener(View.OnClickListener {
-            onBackPressedFromView(view)
-        }
-        )
 
-        initializeMap()
-        mapView.minZoomLevel = 5.0
-        mapView.maxZoomLevel = 18.0
+
+        mapView.minZoomLevel = 10.0
+        mapView.maxZoomLevel = 15.0
         setupMarker()
         setupMapClickListener()
 
@@ -254,10 +236,7 @@ class MapsFragment : Fragment() {
     }
     fun onBackPressed() {
         // Find the FragmentContainerView by its ID
-
-        val fragmentManager = requireActivity().supportFragmentManager
-        fragmentManager.beginTransaction().remove(this@MapsFragment).commit()
-        findNavController().navigateUp()
+        findNavController().navigate(R.id.Home)
 
     }
     private fun setupMapClickListener() {
@@ -266,7 +245,7 @@ class MapsFragment : Fragment() {
                 if (geoPoint != null) {
                     val geocoder = Geocoder(requireContext(), Locale.getDefault())
                     onMapClicked(geoPoint)
-                    updateMarkerPosition(geoPoint,12.0)
+                    updateMarkerPosition(geoPoint,10.0)
                 }
                 return true
             }
@@ -293,10 +272,9 @@ class MapsFragment : Fragment() {
         // Update location button
         builder.setPositiveButton(getString(R.string.Location_Dialog_update)) { _, _ ->
             // Handle the update location action
-            val fragmentManager = requireActivity().supportFragmentManager
-            updateLocation(geoPoint)
-            navigateToFavoritesFragment(fragmentManager)
-ToastUtil.showCustomToast(requireContext(),"Location Updated")
+                updateLocation(geoPoint)
+
+            ToastUtil.showCustomToast(requireContext(),"Location Updated ")
         }
 
         // Just navigate button
@@ -319,9 +297,9 @@ ToastUtil.showCustomToast(requireContext(),"Location Updated")
         // Create the AlertDialog
         val dialog: AlertDialog = builder.create()
         dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.ColorOnSurface))
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.secondary))
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.RED))
-            dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.Primary))
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.secondary))
         }
         dialog.setOnDismissListener(){
             dialog.dismiss()
@@ -345,8 +323,8 @@ ToastUtil.showCustomToast(requireContext(),"Location Updated")
         builder.setPositiveButton(getString(R.string.Location_Dialog_update)) { _, _ ->
             // Handle the update location action
             updateLocation(geoPoint)
-            navigateToFavoritesFragment(fragmentManager)
             ToastUtil.showCustomToast(requireContext(),"Location Updated")
+
         }
 
         // Just navigate button
@@ -369,12 +347,11 @@ ToastUtil.showCustomToast(requireContext(),"Location Updated")
         // Create the AlertDialog
         val dialog: AlertDialog = builder.create()
         dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.ColorOnSurface))
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.secondary))
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.RED))
-            dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.Primary))
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.secondary))
         }
         dialog.setOnDismissListener(){
-            ToastUtil.showCustomToast(requireContext(),"Dialog dismissed")
             dialog.dismiss()
         }
         dialog.show() // Show the dialog
@@ -382,11 +359,13 @@ ToastUtil.showCustomToast(requireContext(),"Location Updated")
         ToastUtil.showCustomToast(requireContext(), "Clicked at: ${geoPoint.latitude}, ${geoPoint.longitude}")
     }
     fun navigateToFavoritesFragment(fragmentManager: FragmentManager) {
-        val favoritesFragment = FavoritesFragment()
-        fragmentManager.beginTransaction()
-            .replace(R.id.fragment_container_view, favoritesFragment)
-            .addToBackStack(null)
-            .commit()
+        lifecycleScope.launch(Dispatchers.Main) {
+            val favoritesFragment = FavoritesFragment()
+            fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container_view, favoritesFragment)
+                .addToBackStack(null)
+                .commit()
+        }
     }
     private fun GoToMainWithUpdatedLocation(geoPoint: GeoPoint) {
         ToastUtil.showCustomToast(requireActivity(),"Navigating to Home")
@@ -401,7 +380,7 @@ ToastUtil.showCustomToast(requireContext(),"Location Updated")
         val geocoder = Geocoder(requireContext(), Locale.getDefault())
 
             Log.i("From MapsFragment", "Searching for location: $location")
-            val addresses = geocoder.getFromLocationName(location, 10) // Get up to 10 suggestions
+            val addresses = geocoder.getFromLocationName(location, 30) // Get up to 10 suggestions
             Log.i("From MapsFragment", "Addresses found: $addresses")
 
             // Improved matching logic
@@ -447,7 +426,6 @@ ToastUtil.showCustomToast(requireContext(),"Location Updated")
 
         binding.suggestionsRecyclerView.layoutManager = LinearLayoutManager(context)
         binding.suggestionsRecyclerView.adapter = suggestionAdapter
-        binding.suggestionsRecyclerView.isNestedScrollingEnabled = true
 
 
         // Search view listener for input handling
@@ -455,17 +433,27 @@ ToastUtil.showCustomToast(requireContext(),"Location Updated")
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (!query.isNullOrEmpty()) {
                     fetchSuggestions(query)
+                }else{
+                    binding.locationSearch.clearFocus()
+                    binding.suggestionsRecyclerView.visibility=View.GONE
+
                 }
+
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (!newText.isNullOrEmpty()) {
                     fetchSuggestions(newText)
+                }else{
+                    binding.locationSearch.clearFocus()
+                    binding.suggestionsRecyclerView.visibility=View.GONE
+
                 }
                 return true
             }
         })
+
     }
 
     // Fetch suggestions based on the user's input
@@ -495,6 +483,7 @@ ToastUtil.showCustomToast(requireContext(),"Location Updated")
                 } ?: emptyList()
 
                 withContext(Dispatchers.Main) {
+                    binding.suggestionsRecyclerView.visibility =View.VISIBLE
                     suggestionList.clear()
                     suggestionList.addAll(suggestions)
                     suggestionAdapter.updateData(suggestionList)

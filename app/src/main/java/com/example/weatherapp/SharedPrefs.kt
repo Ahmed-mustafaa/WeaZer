@@ -10,6 +10,8 @@ class SharedPrefs  constructor(context: Context) {
     companion object {
         private const val SHARED_PREFS_NAME = "myprefs"
         private const val AlarmsSHARED_PREFS_NAME = "alarms_prefs"
+        private val ALARM_SET_KEY = "alarmSet"
+
         private const val KEY_CITIES = "favoriteWeatherList"
         private const val KEY_Alarms = "Alarm"
         private const val KEY_ALARM = "isAlarmAdded"
