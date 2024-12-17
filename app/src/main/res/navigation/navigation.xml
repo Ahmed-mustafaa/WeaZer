@@ -8,12 +8,12 @@
     <!-- The MainActivity is now responsible for navigating to fragments -->
 <activity
     android:id="@+id/Home"
-    android:name="com.example.weatherapp.MainActivity"
+    android:name="com.example.weatherapp.View.MainActivity"
     tools:layout="@layout/activity_main">
 </activity>
     <fragment
         android:id="@+id/Alarm"
-        android:name="com.example.weatherapp.AlarmScreen"
+        android:name="com.example.weatherapp.View.AlarmScreen"
         tools:layout="@layout/alarm_screen">
         <action
             android:id="@+id/action_alarm_to_main"
@@ -29,7 +29,7 @@
 
     <fragment
         android:id="@+id/favorites"
-        android:name="com.example.weatherapp.FavoritesFragment"
+        android:name="com.example.weatherapp.View.FavoritesFragment"
         tools:layout="@layout/activity_favorites">
         <action
             android:id="@+id/action_mapsFragment_to_favoritesFragment"
@@ -43,12 +43,12 @@
 
     <fragment
         android:id="@+id/settings"
-        android:name="com.example.weatherapp.SettingsFragment"
+        android:name="com.example.weatherapp.View.SettingsFragment"
         tools:layout="@layout/settingsscreen" />
 
     <fragment
         android:id="@+id/mapsFragment"
-        android:name="com.example.weatherapp.MapsFragment"
+        android:name="com.example.weatherapp.View.MapsFragment"
         tools:layout="@layout/fragment_maps">
         <action
             android:id="@+id/action_mapsFragment_to_favoritesFragment"

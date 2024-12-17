@@ -1,11 +1,10 @@
 package com.example.weatherapp.service
 
-import com.example.weatherapp.Utils
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import okhttp3.logging.HttpLoggingInterceptor
+
 class RetrofitClient {
     companion object {
 

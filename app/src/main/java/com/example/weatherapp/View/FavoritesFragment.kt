@@ -1,4 +1,4 @@
-package com.example.weatherapp
+package com.example.weatherapp.View
 
 import SharedPrefs
 import android.annotation.SuppressLint
@@ -6,40 +6,35 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
-import androidx.core.view.marginStart
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.weatherapp.NetworkUtils
+import com.example.weatherapp.R
 import com.example.weatherapp.adapter.FavAdapter
 import com.example.weatherapp.databinding.ActivityFavoritesBinding
 import com.example.weatherapp.databinding.CustomdialogBinding
 import com.example.weatherapp.model.ForCast
-import com.example.weatherapp.mvvm.ViewModelFactory
-import com.example.weatherapp.mvvm.WeatherVM
+import com.example.weatherapp.weather_VM.ViewModelFactory
+import com.example.weatherapp.weather_VM.WeatherVM
 import com.example.weatherapp.service.RetrofitClient
 import com.example.weatherapp.weatherRepository.WeatherRepository
-import com.google.android.material.dialog.MaterialDialogs
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 class FavoritesFragment : Fragment() {

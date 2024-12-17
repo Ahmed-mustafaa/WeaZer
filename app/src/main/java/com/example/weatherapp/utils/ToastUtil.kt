@@ -1,46 +1,19 @@
-package com.example.weatherapp
+package com.example.weatherapp.utils
 
 import android.annotation.SuppressLint
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.location.Geocoder
-import android.media.RingtoneManager
 import android.net.Uri
-import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContentProviderCompat
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.ContextCompat.startActivity
-import org.osmdroid.util.GeoPoint
+import com.example.weatherapp.R
 import java.util.Locale
 
 object ToastUtil {
-    fun getCurrentLocation(context: Context, location: GeoPoint): String {
-        val geocoder = Geocoder(context, Locale.getDefault())
-        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 10)
-
-        val selectedAddress = addresses?.find { address ->
-            address.locality?.equals(location) == true ||
-                    address.subAdminArea?.equals(location) == true ||
-                    address.adminArea?.equals(location) == true ||
-                    address.countryName?.equals(location) == true
-        }
-
-        // Return the full address if found, otherwise return a default message
-        return selectedAddress?.getAddressLine(0) ?: "Location not found"
-    }
-
     fun showCustomToast(context: Context, message: String) {
         val inflater = LayoutInflater.from(context)
         val layout =

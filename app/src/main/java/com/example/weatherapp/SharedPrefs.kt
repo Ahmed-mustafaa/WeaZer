@@ -1,5 +1,4 @@
 import android.content.Context
-import com.example.weatherapp.AlarmScreen
 import com.example.weatherapp.model.FavoriteLocation
 import com.example.weatherapp.model.ForCast
 import com.google.gson.Gson

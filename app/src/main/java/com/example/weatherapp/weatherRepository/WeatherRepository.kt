@@ -5,17 +5,14 @@ import android.content.Context
 import android.location.Location
 import android.os.Looper
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
-import com.example.weatherapp.Utils
+import com.example.weatherapp.utils.Utils
 import com.example.weatherapp.model.ForCast
 import com.example.weatherapp.service.RetrofitClient
 import com.example.weatherapp.service.Service
 import com.example.weatherapp.service.TranslationRequest
 import com.google.android.gms.location.*
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.withContext
 
 class WeatherRepository(private val api: Service, context: Context) {
@@ -125,7 +122,7 @@ class WeatherRepository(private val api: Service, context: Context) {
     }
     }
     suspend  fun getWeatherByCooridnates(lat:Double,lon:Double,unit:String):ForCast {
-        return api.getWeatherByCoordinates(lat,lon,unit,Utils.API_KEY)
+        return api.getWeatherByCoordinates(lat,lon,unit, Utils.API_KEY)
     }
 
     /**

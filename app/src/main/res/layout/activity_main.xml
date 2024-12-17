@@ -10,7 +10,7 @@
     android:duration="480"
     android:fromAlpha="0.0"
     android:toAlpha="1.0"
-    tools:context=".MainActivity">
+    tools:context=".View.MainActivity">
     <!-- Main Toolbar -->
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -555,7 +555,7 @@
     <!-- Map Fragment Container -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container_view"
-        android:name="com.example.weatherapp.MapsFragment"
+        android:name="com.example.weatherapp.View.MapsFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"

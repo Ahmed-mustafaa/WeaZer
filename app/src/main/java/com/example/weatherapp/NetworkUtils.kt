@@ -23,17 +23,4 @@ object NetworkUtils {
         }
     }
 
-    fun hasInternetConnection(): Boolean {
-        return try {
-            val url = URL("https://www.google.com") // A reliable host to test
-            val connection = url.openConnection() as HttpURLConnection
-            connection.connectTimeout = 3000 // Timeout in milliseconds
-            connection.connect()
-            connection.responseCode == 200 // HTTP OK
-        } catch (e: Exception) {
-            Log.i("NetworkUtils", "Internet connection available")
-
-            false
-        }
-    }
 }

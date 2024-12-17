@@ -1,4 +1,4 @@
-package com.example.weatherapp.mvvm
+package com.example.weatherapp.weather_VM
 
 import SharedPrefs
 import androidx.lifecycle.ViewModel

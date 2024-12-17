@@ -1,9 +1,7 @@
 package com.example.weatherapp.service
 
-import com.example.weatherapp.Utils
+import com.example.weatherapp.utils.Utils
 import com.example.weatherapp.model.ForCast
-import com.example.weatherapp.model.WeatherList
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -18,7 +16,7 @@ interface Service {
         @Query("units")
         units:String,
         @Query("appid")
-        appid:String =Utils.API_KEY
+        appid:String = Utils.API_KEY
     ): ForCast
     @GET("forecast?")
     suspend fun getWeatherByCoordinates(
@@ -47,6 +45,6 @@ interface Service {
        @Query("q")
        q:String,
      @Query("appid")
-     appid:String =Utils.API_KEY
+     appid:String = Utils.API_KEY
     ): ForCast
 }

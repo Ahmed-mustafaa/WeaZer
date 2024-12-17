@@ -1,4 +1,4 @@
-package com.example.weatherapp
+package com.example.weatherapp.View
 
 import android.annotation.SuppressLint
 import android.app.AlarmManager
@@ -28,6 +28,9 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.weatherapp.AlarmReceiver
+import com.example.weatherapp.R
+import com.example.weatherapp.utils.ToastUtil
 import com.example.weatherapp.adapter.AlarmAdapter
 import com.example.weatherapp.databinding.AlarmScreenBinding
 import com.example.weatherapp.databinding.CustomdialogBinding
@@ -349,7 +352,10 @@ class AlarmScreen : Fragment() {
     @RequiresApi(Build.VERSION_CODES.S)
     private fun scheduleAlarm(timeInMillis: Long) {
         if (!canScheduleExactAlarms()) {
-            ToastUtil.showCustomToast(requireContext(), "This app needs permission to schedule alarms. Please enable it in settings.")
+            ToastUtil.showCustomToast(
+                requireContext(),
+                "This app needs permission to schedule alarms. Please enable it in settings."
+            )
             openAppSettings()
             return
         }
@@ -369,7 +375,7 @@ class AlarmScreen : Fragment() {
 
 if(timeInMillis>=currentTime) {
     alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeInMillis, alarmIntent)
-ToastUtil.showCustomToast(requireContext(), "Alarm scheduled for $timeInMillis!")
+    ToastUtil.showCustomToast(requireContext(), "Alarm scheduled for $timeInMillis!")
 }else{
     val nextDayTimeInMillis = timeInMillis + 24 * 60 * 60 * 1000 // Add 24 hours in milliseconds
 

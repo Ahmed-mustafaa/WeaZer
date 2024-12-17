@@ -1,4 +1,4 @@
-package com.example.weatherapp
+package com.example.weatherapp.View
 
 import SharedPrefs
 import android.annotation.SuppressLint
@@ -18,8 +18,6 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.location.LocationManager
 import android.net.ConnectivityManager
-import android.net.Uri
-import android.os.PowerManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
@@ -35,13 +33,18 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.weatherapp.AlarmReceiver
+import com.example.weatherapp.NetworkStateReceiver
+import com.example.weatherapp.NetworkUtils
+import com.example.weatherapp.R
+import com.example.weatherapp.utils.ToastUtil
 import com.example.weatherapp.adapter.DailyAdapter
 import com.example.weatherapp.adapter.WeatherTodayAdapter
 import com.example.weatherapp.databinding.ActivityMainBinding
 import com.example.weatherapp.model.ForCast
 import com.example.weatherapp.model.WeatherList
-import com.example.weatherapp.mvvm.ViewModelFactory
-import com.example.weatherapp.mvvm.WeatherVM
+import com.example.weatherapp.weather_VM.ViewModelFactory
+import com.example.weatherapp.weather_VM.WeatherVM
 import com.example.weatherapp.service.RetrofitClient
 import com.example.weatherapp.weatherRepository.WeatherRepository
 import com.google.android.gms.location.LocationServices
@@ -51,7 +54,6 @@ import com.google.gson.Gson
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -242,8 +244,8 @@ class MainActivity : AppCompatActivity() {
                             lifecycleScope.launch {
                                 binding.CahcedText.visibility = View.VISIBLE
                                     delay(3000)
-                                currentLat = getSharedPreferences("myprefs", Context.MODE_PRIVATE).getFloat("latitude", 0f).toDouble()
-                                currentLon = getSharedPreferences("myprefs", Context.MODE_PRIVATE).getFloat("longitude", 0f).toDouble()
+                                currentLat = getSharedPreferences("myprefs", MODE_PRIVATE).getFloat("latitude", 0f).toDouble()
+                                currentLon = getSharedPreferences("myprefs", MODE_PRIVATE).getFloat("longitude", 0f).toDouble()
                                 fetchWeatherDataForLocation(currentLat!!, currentLon!!)
                                 observeWeatherData()
                             }
@@ -272,7 +274,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-       ToastUtil.requestBatteryOptimizationPermission(this)
+        ToastUtil.requestBatteryOptimizationPermission(this)
 
 
         binding.pickuplocation.setOnClickListener {
@@ -657,7 +659,7 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
                 forecast.putString("forecast", Gson().toJson(it))
                 forecast.apply()
 
-            } ?: ToastUtil.showCustomToast(this,"No weather data available")
+            } ?: ToastUtil.showCustomToast(this, "No weather data available")
 
         })
     }
@@ -691,16 +693,22 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
             if (!isArabic) {
                 binding.Temp.text =
                     when (selectedUnit) {
-                        "Celsius" -> ToastUtil.formatNumberToArabic(ToastUtil.convertToCelsius(Temp).roundToInt()) + getString(
+                        "Celsius" -> ToastUtil.formatNumberToArabic(
+                            ToastUtil.convertToCelsius(Temp).roundToInt()
+                        ) + getString(
                             R.string.C
                         )
 
                         "Fahrenheit" ->
-                            ToastUtil.formatNumberToArabic(ToastUtil.convertToFahrenheit(Temp).roundToInt()) + getString(
+                            ToastUtil.formatNumberToArabic(
+                                ToastUtil.convertToFahrenheit(Temp).roundToInt()
+                            ) + getString(
                                 R.string.F
                             )
 
-                        else -> ToastUtil.formatNumberToArabic(ToastUtil.convertToKelvin(Temp).roundToInt()) + getString(
+                        else -> ToastUtil.formatNumberToArabic(
+                            ToastUtil.convertToKelvin(Temp).roundToInt()
+                        ) + getString(
                             R.string.K
                         )
                     }
@@ -708,11 +716,18 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
 
                 //English 3adi
                 binding.Temp.text = when (selectedUnit) {
-                    "Celsius" -> "${ToastUtil.convertToCelsius(forecast.weatherList[0].main.temp).roundToInt()}" + getString(R.string.C)
+                    "Celsius" -> "${ToastUtil.convertToCelsius(forecast.weatherList[0].main.temp).roundToInt()}" + getString(
+                        R.string.C
+                    )
 
-                    "Fahrenheit" -> "${ToastUtil.convertToFahrenheit(forecast.weatherList[0].main.temp).roundToInt()}" + getString(R.string.F)
+                    "Fahrenheit" -> "${
+                        ToastUtil.convertToFahrenheit(forecast.weatherList[0].main.temp).roundToInt()}" + getString(
+                        R.string.F
+                    )
 
-                    else -> "${ToastUtil.convertToKelvin(forecast.weatherList[0].main.temp).roundToInt()}" + getString(R.string.K)
+                    else -> "${ToastUtil.convertToKelvin(forecast.weatherList[0].main.temp).roundToInt()}" + getString(
+                        R.string.K
+                    )
                 }
             }
             sharedPreferences.registerOnSharedPreferenceChangeListener { _, key ->
@@ -722,22 +737,34 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
                     if (!isArabic) {
                         when (selectedUnit) {
                             "Celsius" -> binding.Temp.text =
-                                ToastUtil.formatNumberToArabic(ToastUtil.convertToCelsius(forecast.weatherList[0].main.temp).roundToInt()) + getString(R.string.C)
+                                ToastUtil.formatNumberToArabic(
+                                    ToastUtil.convertToCelsius(forecast.weatherList[0].main.temp)
+                                        .roundToInt()
+                                ) + getString(R.string.C)
 
                             "Fahrenheit" -> binding.Temp.text =
-                                ToastUtil.formatNumberToArabic(ToastUtil.convertToFahrenheit(forecast.weatherList[0].main.temp).roundToInt()) + getString(R.string.F)
+                                ToastUtil.formatNumberToArabic(
+                                    ToastUtil.convertToFahrenheit(
+                                        forecast.weatherList[0].main.temp
+                                    ).roundToInt()
+                                ) + getString(R.string.F)
 
                             else -> binding.Temp.text =
-                                ToastUtil.formatNumberToArabic(ToastUtil.convertToKelvin(forecast.weatherList[0].main.temp).roundToInt()) + getString(R.string.K)
+                                ToastUtil.formatNumberToArabic(
+                                    ToastUtil.convertToKelvin(forecast.weatherList[0].main.temp)
+                                        .roundToInt()
+                                ) + getString(R.string.K)
 
                         }
                     } else {
                         binding.Temp.text = when (selectedUnit) {
-                            "Kelvin" -> "${ToastUtil.convertToKelvin(forecast.weatherList[0].main.temp).roundToInt()}" + getString(
+                            "Kelvin" -> "${
+                                ToastUtil.convertToKelvin(forecast.weatherList[0].main.temp).roundToInt()}" + getString(
                                 R.string.K
                             )
 
-                            "Fahrenheit" -> "${ToastUtil.convertToFahrenheit(forecast.weatherList[0].main.temp).roundToInt()}" + getString(
+                            "Fahrenheit" -> "${
+                                ToastUtil.convertToFahrenheit(forecast.weatherList[0].main.temp).roundToInt()}" + getString(
                                 R.string.F
                             )
 
@@ -768,13 +795,17 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
                 when (selectedUnit) {
                     "Celsius" -> {
                         binding.tempMax.text =
-                            getString(R.string.H) + " : " +ToastUtil.formatNumberToArabic( H.toInt()) + getString(R.string.C)
+                            getString(R.string.H) + " : " + ToastUtil.formatNumberToArabic(H.toInt()) + getString(
+                                R.string.C
+                            )
                         binding.tempMin.text =
                             getString(R.string.L) + " : " + ToastUtil.formatNumberToArabic(L.toInt()) + getString(
                                 R.string.C
                             )
                         binding.tempFeelsLike.text =
-                            this.getString(R.string.feelsLike) + ": " + ToastUtil.formatNumberToArabic(feelsLikeTranslated.toInt())+ getString(
+                            this.getString(R.string.feelsLike) + ": " + ToastUtil.formatNumberToArabic(
+                                feelsLikeTranslated.toInt()
+                            ) + getString(
                                 R.string.C
                             )
 
@@ -806,11 +837,19 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
 
                     else -> {
                         binding.tempMax.text =
-                            getString(R.string.H) + " : " + ToastUtil.formatNumberToArabic(ToastUtil.convertToKelvin(H).toInt()) + getString(
+                            getString(R.string.H) + " : " + ToastUtil.formatNumberToArabic(
+                                ToastUtil.convertToKelvin(
+                                    H
+                                ).toInt()
+                            ) + getString(
                                 R.string.K
                             )
                         binding.tempMin.text =
-                            getString(R.string.L) + " : " + ToastUtil.formatNumberToArabic(ToastUtil.convertToKelvin(L).toInt()) + getString(
+                            getString(R.string.L) + " : " + ToastUtil.formatNumberToArabic(
+                                ToastUtil.convertToKelvin(
+                                    L
+                                ).toInt()
+                            ) + getString(
                                 R.string.K
                             )
                         binding.tempFeelsLike.text =
@@ -858,7 +897,10 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
                                 R.string.K
                             )
                         binding.tempFeelsLike.text =
-                            this.getString(R.string.feelsLike) + ": " + "${ToastUtil.convertToKelvin(forecast.weatherList[0].main.feels_like).roundToInt()}" + getString(
+                            this.getString(R.string.feelsLike) + ": " + "${
+                                ToastUtil.convertToKelvin(
+                                    forecast.weatherList[0].main.feels_like
+                                ).roundToInt()}" + getString(
                                 R.string.K
                             )
                     }
@@ -867,7 +909,10 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
 
 
             val descriptionTranslated =
-               ToastUtil.translateWeatherDescription(forecast.weatherList[0].weather[0].description, this)
+                ToastUtil.translateWeatherDescription(
+                    forecast.weatherList[0].weather[0].description,
+                    this
+                )
             binding.Descriptions.text = descriptionTranslated
             Log.i(
                 "MainActivity",
@@ -938,7 +983,7 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
             binding.Linear.visibility = View.VISIBLE
             binding.mainLayout.visibility = View.VISIBLE
         } else {
-            ToastUtil.showCustomToast(this,"No weather data available")
+            ToastUtil.showCustomToast(this, "No weather data available")
         }
     }
 
@@ -1012,13 +1057,19 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
         if (!isArabic) {
 
             binding.windval.text = when (WindUnit) {
-                "MPH" -> "${ToastUtil.formatNumberToArabic(currentWeather.wind.speed.toInt()).format(".")} " + getString(R.string.mph)
+                "MPH" -> "${ToastUtil.formatNumberToArabic(currentWeather.wind.speed.toInt()).format(".")} " + getString(
+                    R.string.mph
+                )
 
-                else -> "${ToastUtil.formatNumberToArabic(currentWeather.wind.speed.toInt()).format(".")} " + getString(R.string.Km)
+                else -> "${ToastUtil.formatNumberToArabic(currentWeather.wind.speed.toInt()).format(".")} " + getString(
+                    R.string.Km
+                )
             }
         } else {
             binding.windval.text = when (WindUnit) {
-                "MPH" -> "${ToastUtil.convertToMPH(currentWeather.wind.speed).toInt()}" + getString(R.string.mph)
+                "MPH" -> "${ToastUtil.convertToMPH(currentWeather.wind.speed).toInt()}" + getString(
+                    R.string.mph
+                )
                 else -> (currentWeather.wind.speed.toInt()).toString() + getString(R.string.Km)
             }
 
@@ -1032,14 +1083,24 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
                 if (!isArabic) {
                     binding.windval.text = when (WindUnit) {
 
-                        "MPH" -> ToastUtil.convertToMPH(currentWeather.wind.speed).toString().format(".")+ getString(R.string.mph)
+                        "MPH" -> ToastUtil.convertToMPH(currentWeather.wind.speed).toString().format(".")+ getString(
+                            R.string.mph
+                        )
                         else -> (currentWeather.wind.speed).toString().format(".") + getString(R.string.Km)
 
                     }
                 }else{
                     binding.windval.text = when (WindUnit) {
-                        "MPH" -> "${ToastUtil.formatNumberToArabic(ToastUtil.convertToMPH(currentWeather.wind.speed).toInt())}" + getString(R.string.mph)
-                        else -> "${ToastUtil.formatNumberToArabic((currentWeather.wind.speed).toInt())}" + getString(R.string.Km)
+                        "MPH" -> "${
+                            ToastUtil.formatNumberToArabic(
+                                ToastUtil.convertToMPH(
+                                    currentWeather.wind.speed
+                                ).toInt()
+                            )
+                        }" + getString(R.string.mph)
+                        else -> "${ToastUtil.formatNumberToArabic((currentWeather.wind.speed).toInt())}" + getString(
+                            R.string.Km
+                        )
                     }
                 }
             }
@@ -1058,8 +1119,10 @@ Log.i("MainActivity", "Received latitude: $latitude, longitude: $longitude")
                 pressureval.text = ToastUtil.formatNumberToArabic(currentWeather.main.pressure)
                 humidityval.text = ToastUtil.formatNumberToArabic(currentWeather.main.humidity)
                 visibilityval.text = ToastUtil.formatNumberToArabic(currentWeather.visibility)
-                airqualityval.text = ToastUtil.formatNumberToArabic(currentWeather.main.temp.toInt())// Placeholder
-                uvval.text = ToastUtil.formatNumberToArabic(currentWeather.main.sea_level) // Placeholder// Placeholder
+                airqualityval.text =
+                    ToastUtil.formatNumberToArabic(currentWeather.main.temp.toInt())// Placeholder
+                uvval.text =
+                    ToastUtil.formatNumberToArabic(currentWeather.main.sea_level) // Placeholder// Placeholder
             }
             humiditygraphic.setImageResource(R.drawable.humidity)
             PressureGraphic.setImageResource(R.drawable.pressure)

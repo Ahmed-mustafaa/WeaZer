@@ -14,10 +14,12 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
-import com.example.weatherapp.AlarmScreen.Companion.ALARM_CHANNEL_ID
+import com.example.weatherapp.View.AlarmScreen.Companion.ALARM_CHANNEL_ID
+import com.example.weatherapp.View.MainActivity
 import com.example.weatherapp.service.RetrofitClient
+import com.example.weatherapp.utils.ToastUtil
+import com.example.weatherapp.utils.Utils
 import com.example.weatherapp.weatherRepository.WeatherRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -83,7 +85,8 @@ private var weather:String?=null
                 val weatherRepository =
                     WeatherRepository(RetrofitClient.apiService, applicationContext)
 
-                val weatherResponse = weatherRepository.getWeatherByCooridnates(lat.toDouble(),lon.toDouble() ,Utils.API_KEY)
+                val weatherResponse = weatherRepository.getWeatherByCooridnates(lat.toDouble(),lon.toDouble() ,
+                    Utils.API_KEY)
 
                 Log.d("WeatherNotificationService", "Weather data fetched: ${weatherResponse.city.coord.lat} ${weatherResponse.city.coord.lon}")
                 val temp =

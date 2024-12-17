@@ -1,4 +1,4 @@
-package com.example.weatherapp
+package com.example.weatherapp.View
 
 import SharedPrefs
 import android.annotation.SuppressLint
@@ -18,8 +18,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.weatherapp.databinding.FragmentMapsBinding
-import com.example.weatherapp.mvvm.ViewModelFactory
-import com.example.weatherapp.mvvm.WeatherVM
+import com.example.weatherapp.weather_VM.ViewModelFactory
+import com.example.weatherapp.weather_VM.WeatherVM
 import com.example.weatherapp.service.RetrofitClient
 import com.example.weatherapp.weatherRepository.WeatherRepository
 import kotlinx.coroutines.launch
@@ -38,12 +38,11 @@ import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.weatherapp.R
+import com.example.weatherapp.utils.ToastUtil
 import com.example.weatherapp.adapter.SuggestionAdapter
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 
 import kotlinx.coroutines.withContext
 import org.osmdroid.events.MapEventsReceiver
@@ -274,14 +273,14 @@ class MapsFragment : Fragment() {
             // Handle the update location action
                 updateLocation(geoPoint)
 
-            ToastUtil.showCustomToast(requireContext(),"Location Updated ")
+            ToastUtil.showCustomToast(requireContext(), "Location Updated ")
         }
 
         // Just navigate button
         builder.setNeutralButton (getString(R.string.Location_Dialog_Navigate)) { dialog, id ->
             // Handle the just navigate action
             navigateToLocation(geoPoint,10.0)
-            ToastUtil.showCustomToast(requireContext(),"Navigating to location")
+            ToastUtil.showCustomToast(requireContext(), "Navigating to location")
 
         }
         // Cancel button
@@ -297,16 +296,25 @@ class MapsFragment : Fragment() {
         // Create the AlertDialog
         val dialog: AlertDialog = builder.create()
         dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.secondary))
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.RED))
-            dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.secondary))
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(ContextCompat.getColor(requireContext(),
+                R.color.secondary
+            ))
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(ContextCompat.getColor(requireContext(),
+                R.color.RED
+            ))
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setTextColor(ContextCompat.getColor(requireContext(),
+                R.color.secondary
+            ))
         }
         dialog.setOnDismissListener(){
             dialog.dismiss()
         }
         dialog.show() // Show the dialog
         // Optional: show a toast with the clicked coordinates
-        ToastUtil.showCustomToast(requireContext(), "Clicked at: ${geoPoint.latitude}, ${geoPoint.longitude}")
+        ToastUtil.showCustomToast(
+            requireContext(),
+            "Clicked at: ${geoPoint.latitude}, ${geoPoint.longitude}"
+        )
     }
     fun showUpdateLocationDialog(
         context: Context,
@@ -323,7 +331,7 @@ class MapsFragment : Fragment() {
         builder.setPositiveButton(getString(R.string.Location_Dialog_update)) { _, _ ->
             // Handle the update location action
             updateLocation(geoPoint)
-            ToastUtil.showCustomToast(requireContext(),"Location Updated")
+            ToastUtil.showCustomToast(requireContext(), "Location Updated")
 
         }
 
@@ -331,7 +339,7 @@ class MapsFragment : Fragment() {
         builder.setNeutralButton (getString(R.string.Location_Dialog_Navigate)) { dialog, id ->
             // Handle the just navigate action
             navigateToLocation(geoPoint,10.0)
-            ToastUtil.showCustomToast(requireContext(),"Navigating to location")
+            ToastUtil.showCustomToast(requireContext(), "Navigating to location")
 
         }
         // Cancel button
@@ -347,16 +355,25 @@ class MapsFragment : Fragment() {
         // Create the AlertDialog
         val dialog: AlertDialog = builder.create()
         dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.secondary))
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.RED))
-            dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.secondary))
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(ContextCompat.getColor(requireContext(),
+                R.color.secondary
+            ))
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(ContextCompat.getColor(requireContext(),
+                R.color.RED
+            ))
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setTextColor(ContextCompat.getColor(requireContext(),
+                R.color.secondary
+            ))
         }
         dialog.setOnDismissListener(){
             dialog.dismiss()
         }
         dialog.show() // Show the dialog
         // Optional: show a toast with the clicked coordinates
-        ToastUtil.showCustomToast(requireContext(), "Clicked at: ${geoPoint.latitude}, ${geoPoint.longitude}")
+        ToastUtil.showCustomToast(
+            requireContext(),
+            "Clicked at: ${geoPoint.latitude}, ${geoPoint.longitude}"
+        )
     }
     fun navigateToFavoritesFragment(fragmentManager: FragmentManager) {
         lifecycleScope.launch(Dispatchers.Main) {
@@ -368,7 +385,7 @@ class MapsFragment : Fragment() {
         }
     }
     private fun GoToMainWithUpdatedLocation(geoPoint: GeoPoint) {
-        ToastUtil.showCustomToast(requireActivity(),"Navigating to Home")
+        ToastUtil.showCustomToast(requireActivity(), "Navigating to Home")
         val Intent = Intent(requireContext(), MainActivity::class.java)
         Intent.putExtra("latitude", geoPoint.latitude)
         Intent.putExtra("longitude", geoPoint.longitude)

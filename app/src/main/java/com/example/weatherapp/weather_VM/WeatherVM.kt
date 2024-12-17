@@ -1,9 +1,8 @@
-package com.example.weatherapp.mvvm
+package com.example.weatherapp.weather_VM
 
 
 import SharedPrefs
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.weatherapp.model.ForCast

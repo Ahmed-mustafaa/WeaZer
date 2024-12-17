@@ -43,7 +43,7 @@
         </service>
 
         <activity
-            android:name=".MainActivity">
+            android:name=".View.MainActivity">
         </activity>
 
         <receiver android:name=".AlarmReceiver" />

@@ -1,4 +1,4 @@
-package com.example.weatherapp
+package com.example.weatherapp.View
 
 import android.annotation.SuppressLint
 import android.app.LocaleManager
@@ -15,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import com.example.weatherapp.R
 import com.example.weatherapp.databinding.SettingsscreenBinding
 import java.util.Locale
 

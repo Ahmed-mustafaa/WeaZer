@@ -14,7 +14,9 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.example.weatherapp.AlarmScreen.Companion.ALARM_CHANNEL_ID
+import com.example.weatherapp.View.AlarmScreen
+import com.example.weatherapp.View.AlarmScreen.Companion.ALARM_CHANNEL_ID
+import com.example.weatherapp.View.MainActivity
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

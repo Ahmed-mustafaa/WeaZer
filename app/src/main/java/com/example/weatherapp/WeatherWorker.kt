@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.weatherapp.service.RetrofitClient
+import com.example.weatherapp.utils.Utils
 import com.example.weatherapp.weatherRepository.WeatherRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
